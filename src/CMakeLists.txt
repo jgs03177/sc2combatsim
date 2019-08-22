@@ -1,6 +1,7 @@
 #add_library(lodepng STATIC lodepng)
 add_executable(SC2CombatSim
-   main sim_bot simulator combinator jsoncpp lodepng screen
+   main.cpp sim_bot.cpp simulator.cpp combinator.cpp jsoncpp.cpp lodepng.cpp screen.cpp
+        sim_bot.h simulator.h combinator.h lodepng.h
 )
 
 #target_link_libraries(SC2CombatSim lodepng)

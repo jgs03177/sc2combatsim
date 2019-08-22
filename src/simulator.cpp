@@ -4,6 +4,8 @@
 
 #include "simulator.h"
 
+#define SCREENCAPTURE
+
 std::string gettimestr() {
 	time_t rawtime;
 	struct tm timeinfo;
@@ -14,6 +16,8 @@ std::string gettimestr() {
 	timeinfo = *localtime(&rawtime);
 #endif
 	std::ostringstream o;
+	//char buffer[80];
+	//strftime(buffer, 80, "%Y-%m-%d %H-%M-%S", &timeinfo);
 	o << timeinfo.tm_year + 1900 << '-'
 		<< std::setw(2) << std::setfill('0') << timeinfo.tm_mon + 1 << '-'
 		<< std::setw(2) << std::setfill('0') << timeinfo.tm_mday << ' '
@@ -143,10 +147,10 @@ int Simulator::Begin() {
 				cframe = 0;
 				simflag = oncheck;
 #if !defined(__linux__)
-#ifdef screencapture
+#ifdef SCREENCAPTURE
 				sim1->screencapture("output/s_" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png", img_compression);
 				sim2->screencapture("output/s_" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png", img_compression);
-#endif // screencapture
+#endif // SCREENCAPTURE
 #endif // !defined(__linux__)
 			}
 			break;
@@ -290,10 +294,10 @@ void Simulator::resetcoordinator() {
 void Simulator::setcoordinator(int argc, char* argv[]) {
 
 #if !defined(__linux__)
-#ifdef screencapture
+#ifdef SCREENCAPTURE
 	sc2::RenderSettings settings(800, 600, 300, 300);
 	coordinator_->SetRender(settings);
-#endif // screencapture
+#endif // SCREENCAPTURE
 #endif // !defined(__linux__)
 
 	coordinator_->LoadSettings(argc, argv);

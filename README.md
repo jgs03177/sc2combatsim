@@ -1,12 +1,14 @@
 
-## StarCraft 2 Combat Simulator
+# StarCraft 2 Combat Simulator
 
 
 ## Dependencies
 
 [s2client-api](https://github.com/Blizzard/s2client-api)
 
+[lodepng](https://lodev.org/lodepng/)
 
+[jsoncpp](https://github.com/open-source-parsers/jsoncpp)
 
 ## Links
 
