@@ -1,0 +1,7 @@
+build/*
+lib/*
+!lib/README.md
+include/*
+!include/README.md
+config/*
+!config/README.md
