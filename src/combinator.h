@@ -1,42 +1,73 @@
 #pragma once
+
+#include "configurator.h"
+
 #include <sc2api/sc2_api.h>
 
-#include "json/json-forwards.h"
+#include <vector>
 
-using namespace sc2;
+class CombinatorConfig;
 
 class Combinator
 {
 public:
-	//init
-	void SetUnitData(const ObservationInterface* observation);
+	// init
+	void set_unitdata(const sc2::ObservationInterface* observation);
+	void set_unitdata(const sc2::UnitTypes& unitdata);
+	void set_config(const CombinatorConfig& config); // reset needs this
 
-	// get the squad randomly (in dirichlet distribution).
-	bool construct_squad(Race race, int32_t& mineral, int32_t& gas, int32_t& food, Json::Value& squad_json, float probability);
-	// old dirichlet
-	bool construct_squad_d1(Race race, int32_t& mineral, int32_t& gas, int32_t& food, Json::Value& squad_json, float probability);
-	// old
-	bool construct_squad_old(Race race, int32_t& mineral, int32_t& gas, int32_t& food, Json::Value& squad_json, float probability);
+	// step 1a - reset resources & unitlist as stated in configs
+	void reset();
+
+	// step 1b (additional) - set resources
+	void clear_resources();
+	void set_resources(int mineral, int gas, float food);
+	void add_resources(int mineral, int gas, float food);
+
+	// step 1b (additional) - set unitlists
+	void clear_unitlist();
+	void add_unitlist(int index); // predefined index
+	void add_unitlist(const std::string& candidate); // name
+	void add_unitlist(const std::vector<sc2::UnitTypeID>& candidates); // unittypeids
+
+	// step 2 - priorities are mixed
+	bool pick_and_rearrange_candidates(float probability = 1.0f);
+	
+	// step 3 - make squad
+	bool make_squad();
+	bool make_squad_simultaneous();
+
+	// step 4 - get all infos
+	void get_resources(int& mineral, int& gas, float& food) const;
+	void get_unitlist(std::vector<sc2::UnitTypeID>& candidates) const;
+	void get_squad(std::vector<sc2::UnitTypeID>& squad_unittypeid, std::vector<int>& squad_quantity) const;
+
+	// load/dump
+	bool read_from_path(const std::string& path);
 
 private:
-	UnitTypes unitdata;
+    bool use_config = false;
+	CombinatorConfig config;
+	sc2::UnitTypes unitdata;
+	int32_t mineral;
+	int32_t gas;
+	float food;	// due to zergling
 
-	// get list of units and pick with inclusion probability p.
-	int32_t get_squad_permutation(Race race, std::vector<UnitTypeID>& unit_permutations, float probability = 0.5);
+	// candidates (before generation)
+	std::vector<sc2::UnitTypeID> candidates;
 
-	// Warning: Input name must not include race : ex) zergling
-	UnitTypeID NameToUnitTypeID(std::string name);
+	// generated squads (after generation)
+	std::vector<sc2::UnitTypeID> squad_unittypeid;
+	std::vector<int> squad_quantity;
 
-	// and pick units with inclusion probability p and rearrange orders.
-	int32_t get_squad_permutation(const std::vector<UnitTypeID>& candidate_units, std::vector<UnitTypeID>& unit_permutations, float probability);
+	// Get max number of the given unit that we can buy with the given resource.
+	float get_unit_affordable(sc2::UnitTypeID unittypeid);
+	float get_unit_affordable(sc2::UnitTypeID unittypeid, int32_t mineral, int32_t gas, float food);
 
-	// get max number of the given unit that we can buy with the given resource.
-	float get_unit_affordable(UnitTypeID unittypeid, int32_t mineral, int32_t gas, int32_t food);
+	// Subtract resource with the amount of the cost of the unit.
+	void subtract_unit_resource(sc2::UnitTypeID unittypeid, int32_t num_units);
 
-	// subtract resource with the amount of the cost of the unit.
-	void subtract_unit_resource(UnitTypeID unittypeid, int32_t& mineral, int32_t& gas, int32_t& food, int32_t num_units);
-
-	// buy some specific unit with some uniformly random number. 
-	int32_t buy_unit_uniformly(UnitTypeID unittypeid, int32_t& mineral, int32_t& gas, int32_t& food);
+	// Convert namestring to unittypeid.
+    // Warning: Input name must not include race : ex) zergling
+	sc2::UnitTypeID NameToUnitTypeID(const std::string& name) const;
 };
-

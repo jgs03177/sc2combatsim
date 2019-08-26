@@ -1,34 +1,72 @@
-#include <iomanip>
-
-#include "sc2utils/sc2_manage_process.h"
-
 #include "simulator.h"
+
+#include "bots.h"
+
+#include <sc2api/sc2_api.h>
+#include <sc2utils/sc2_manage_process.h>
+
+#include <iostream>
 
 #define SCREENCAPTURE
 
-std::string gettimestr() {
-	time_t rawtime;
-	struct tm timeinfo;
-	time(&rawtime);
-#if defined(_WIN32)
-	localtime_s(&timeinfo, &rawtime);
-#else
-	timeinfo = *localtime(&rawtime);
-#endif
-	std::ostringstream o;
-	//char buffer[80];
-	//strftime(buffer, 80, "%Y-%m-%d %H-%M-%S", &timeinfo);
-	o << timeinfo.tm_year + 1900 << '-'
-		<< std::setw(2) << std::setfill('0') << timeinfo.tm_mon + 1 << '-'
-		<< std::setw(2) << std::setfill('0') << timeinfo.tm_mday << ' '
-		<< std::setw(2) << std::setfill('0') << timeinfo.tm_hour << '-'
-		<< std::setw(2) << std::setfill('0') << timeinfo.tm_min << '-'
-		<< std::setw(2) << std::setfill('0') << timeinfo.tm_sec;
+int Simulator::Begin() {
 
-	return o.str();
+	set();
+
+	while (nround >= cround) { // While simulation is not finished. cround |-> Z_[1, nround] 
+
+		std::cout << "launch!" << std::endl;
+		coordinator_->LaunchStarcraft();
+
+		std::cout << "start!" << std::endl;
+		// maximum 2 player, visions are shared.
+		coordinator_->StartGame(config.mapname);
+
+		std::cout << "Game Begins!" << std::endl;
+		Update();	// while (simulator.update()){}
+
+		bool properexit;
+
+#if defined(__linux__)
+		properexit = false;
+#else
+		// code to check disconnection in windows OS.
+		properexit = true;
+
+		sc2::Agent* sim1 = p1.Bot();
+		sc2::Agent* sim2 = p2.Bot();
+
+		if (sim1->Control()->GetAppState() != sc2::AppState::normal ||
+			sim2->Control()->GetAppState() != sc2::AppState::normal) {
+			std::cout << "sim1 is " << static_cast<int>(sim1->Control()->GetAppState()) << std::endl;
+			std::cout << "sim2 is " << static_cast<int>(sim2->Control()->GetAppState()) << std::endl;
+			properexit = false;
+		}
+		if (sim1->Control()->IsInGame() || !sim1->Control()->IsReadyForCreateGame()) {
+			std::cout << "sim1 is in game!" << std::endl;
+			properexit = false;
+		}
+		if (sim2->Control()->IsInGame() || !sim2->Control()->IsReadyForCreateGame()) {
+			std::cout << "sim2 is in game!" << std::endl;
+			properexit = false;
+		}
+#endif
+		// if the game is not properly terminated, do these.
+		if (!properexit) {
+			std::cout << "Something's wrong! Trying to reset!" << std::endl;
+			coordinator_->LeaveGame();
+			sc2::SleepFor(1000);
+
+			reset();
+		}
+
+		// wait child processes for 1 sec to die.
+		sc2::SleepFor(1000);
+	}
+	return 0;
 }
 
-int Simulator::Begin() {
+int Simulator::Update() {
 	enum {
 		onstart,
 		onchange,
@@ -53,64 +91,41 @@ int Simulator::Begin() {
 	int32_t cdelay = 0;
 
 	while (coordinator_->Update()) {
+		std::cout << simflag << std::endl;
 #if !defined(__linux__)
 		sc2::SleepFor(1);	// to reduce load to cpu and prevent disconnection.
 #endif
-							//std::cout << cround << std::endl;
+		//std::cout << cround << std::endl;
 		if (simflag != oncheck) {
-			ofs_error << simflag;
+			recorder.err() << simflag;
 		}
 		switch (simflag) {
-			// initialization, turn on vision
+		// initialization, turn on vision
 		case onstart: {
-			sim1->d_init();
-			sim2->d_init();
+			p1.GameInit();
+			p2.GameInit();
+			p1.ShowMap();
+			p2.ShowMap();
 			simflag = onchange;
 			break;
 		}
-					  // fetch battles randomly
+		// fetch battles randomly
 		case onchange: {
 			if (neednewsquad) {
-				int32_t ore1, gas1, food1;
-				int32_t ore2, gas2, food2;
-
-				ore1 = ore2 = ore;
-				gas1 = gas2 = gas;
-				food1 = food2 = food;
-				Json::Value diff_resource;
-				// use input in inputpath
-				if (use_input) {
-					std::ifstream inputfile = std::ifstream(inputpath + "/r_" + std::to_string(cround) + ".txt");
-					if (!inputfile.good()) {
-						std::cout << "cannot read r_" << std::to_string(cround) << ".txt. halting." << std::endl;
-						ofs_error << "cannot read r_" << std::to_string(cround) << ".txt. halting." << std::endl;
-						exit(1);
-					}
-					Json::Value i_text;
-					inputfile >> i_text;
-					inputfile.close();
-
-					o_squad_sim1 = i_text["squad1"];
-					o_squad_sim2 = i_text["squad2"];
-
-					std::cout << "read successfully." << std::endl;
-
-					ore = i_text["limit"]["ore"].asInt();
-					gas = i_text["limit"]["gas"].asInt();
-					food = i_text["limit"]["food"].asInt();
-					diff_resource = i_text["diff"];
+				if(false){
+				//if (use_input){
+					//p1.construct_squad_from_file();
+					//p2.construct_squad_from_file();
 				}
-				else {
-					sim1->d_construct_squad(race_sim1, ore1, gas1, food1, o_squad_sim1, prob_combination);
-					sim2->d_construct_squad(race_sim2, ore2, gas2, food2, o_squad_sim2, prob_combination);
-					diff_resource["ore1"] = ore1;
-					diff_resource["gas1"] = gas1;
-					diff_resource["food1"] = food1;
-					diff_resource["ore2"] = ore2;
-					diff_resource["gas2"] = gas2;
-					diff_resource["food2"] = food2;
+				else{
+					p1.combinator().reset();
+					p1.combinator().pick_and_rearrange_candidates();
+					p1.combinator().make_squad();
+					p2.combinator().reset();
+					p2.combinator().pick_and_rearrange_candidates();
+					p2.combinator().make_squad();
 				}
-				recordhead(diff_resource);
+				recorder.record_combination(p1, p2);
 				neednewsquad = false;
 				crepeat = 0;
 			}
@@ -123,42 +138,50 @@ int Simulator::Begin() {
 #endif
 			break;
 		}
-					   // delay for waiting death remainder to disappear
+		 // delay for waiting death remainder to disappear
 		case indelay: {
 			if (cdelay >= ndelay)
 				simflag = oncreate;
 			cdelay++;
 			break;
 		}
-					   // create units for battle
+		// create units for battle
 		case oncreate: {
-			sim1->d_deployunit(o_squad_sim1);
-			sim2->d_deployunit(o_squad_sim2);
+			p1.DeployUnit();
+			p2.DeployUnit();
 
 			simflag = increate;
 			break;
 		}
-					   // wait until the units to be created,
-					   // because units are not created instantly.
+		// wait until the units to be created,
+		// because units are not created instantly.
 		case increate: {
-			size_t sim1size = sim1->CountUnitType();
-			size_t sim2size = sim2->CountUnitType();
+			size_t sim1size = p1.CountPlayerUnit();
+			size_t sim2size = p2.CountPlayerUnit();
 			if (sim1size != 0 && sim2size != 0) {
 				cframe = 0;
 				simflag = oncheck;
 #if !defined(__linux__)
 #ifdef SCREENCAPTURE
-				sim1->screencapture("output/s_" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png", img_compression);
-				sim2->screencapture("output/s_" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png", img_compression);
+				const std::string imgname1 = 
+					"output/s" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png";
+				const std::string imgname2 = 
+					"output/s" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png";
+
+				// TODO: Move Camera Properly
+				p1.MoveCamera();
+				p1.ScreenCapture(imgname1);
+				p2.MoveCamera();
+				p2.ScreenCapture(imgname2);
 #endif // SCREENCAPTURE
 #endif // !defined(__linux__)
 			}
 			break;
 		}
-					   // check if one side is eliminated.
+		// check if one side is eliminated.
 		case oncheck: {
-			size_t sim1size = sim1->CountUnitType();
-			size_t sim2size = sim2->CountUnitType();
+			size_t sim1size = p1.CountPlayerUnit();
+			size_t sim2size = p2.CountPlayerUnit();
 			// in battle
 			if (sim1size != 0 && sim2size != 0 && cframe < nframe) {
 				cframe++;
@@ -172,43 +195,32 @@ int Simulator::Begin() {
 			}
 		}
 		case oncount: {
-			size_t sim1size = sim1->CountUnitType();
-			size_t sim2size = sim2->CountUnitType();
+			size_t sim1size = p1.CountPlayerUnit();
+			size_t sim2size = p2.CountPlayerUnit();
 
 			std::string result;
 			// timeout
 			if (cframe >= nframe) {
-				o_squad_remaining.clear();
 				result = "timeout";
 			}
 			// sim1 win
 			else if (sim1size != 0) {
-				sim1->d_countunits(o_squad_remaining);
-				result = "squad1_win";
+				result = "p1_win";
 			}
 			// sim2 win
 			else if (sim2size != 0) {
-				sim2->d_countunits(o_squad_remaining);
-				result = "squad2_win";
+				result = "p2_win";
 			}
 			// draw
 			else {
-				o_squad_remaining.clear();
 				result = "draw";
 			}
 
-			Json::Value o_item;
-
-			o_item["result"] = result;
-			o_item["frame"] = cframe;
-			o_item["remain"] = o_squad_remaining;
-			o_item["score"] = 0;
-
-			recordbody(o_item);
+			recorder.record_result(p1, p2, result, cframe);
 			cbattle++;
 			crepeat++;
 			if (crepeat >= nrepeat) {
-				writefile();
+				recorder.writefile("output/r_" + std::to_string(cround) + ".json");
 				neednewsquad = true;
 				cround++; // after printing, count the rounds.
 			}
@@ -217,82 +229,75 @@ int Simulator::Begin() {
 				simflag = onremove;
 				break;
 			}
-			else { // finished all iteration.
+			else { // finish the simulation (and restart if needed).
 				simflag = onfinish;
 				break;
 			}
 		}
 		case onremove: {
-			sim1->d_killunit();
-			sim2->d_killunit();
+			p1.KillPlayerUnit();
+			p2.KillPlayerUnit();
 			simflag = inremove;
 			break;
 		}
-					   // wait until all units are cleared
+		// wait until all units are cleared
 		case inremove: {
-			size_t sim1size = sim1->CountUnitType();
-			size_t sim2size = sim2->CountUnitType();
+			size_t sim1size = p1.CountPlayerUnit();
+			size_t sim2size = p2.CountPlayerUnit();
 			if (sim1size == 0 && sim2size == 0) {
 				simflag = onchange;
 			}
 			break;
 		}
-					   // simulation end
+		// simulation end
 		case onfinish: {
-			sim1->d_finish();
-			sim2->d_finish();
+			p1.LeaveGame();
+			p2.LeaveGame();
 
 			simflag = infinish;
 			break;
 		}
-					   // it takes about 4 steps to finish
+		// finishing. it takes about 4 steps to finish.
 		case infinish: {
 			break;
 		}
-					   // error
+		// error
 		default: {
 			std::cout << "State error." << std::endl;
-			ofs_error << "State error." << std::endl;
 			exit(1);
 			break;
 		}
 		}
+
+		p1.SendDebug();
+		p2.SendDebug();
 	}
 
 	return 0;
 }
 
 Simulator::~Simulator() {
-	ofs_outputraw << "]}" << std::endl;
-	ofs_outputraw.close();
-	ofs_error.close();
 	delete coordinator_;
 }
 
-Simulator::Simulator(Json::Value param, int32_t nround, int32_t nrepeat, int32_t race, int32_t stepsize)
-	: nround(nround), nrepeat(nrepeat), stepsize(stepsize) {
-	SetRaces(race);
-	SetResources(15000, 5000, 75);
-	cround = 1;
-	neednewsquad = true;
-	img_compression = param.get("img_compression", 5).asInt();
-	prob_combination = param.get("prob_combination", 1.0f).asFloat();
-	o_note = param.get("note", Json::Value(Json::ValueType::arrayValue));;
-	std::string timestr = gettimestr();
-	ofs_outputraw.open("logs/" + timestr + " raw.txt");
-	ofs_error.open("logs/" + timestr + " log.txt");
-	ofs_outputraw << "{\"battles\" : [" << std::endl;
-	coordinator_ = new Coordinator();
-	use_input = false;
+Simulator::Simulator(int argc, char* argv[], const SimulatorConfig& config) :
+	cround(1),
+	crepeat(0),
+	neednewsquad(true),
+	argc(argc),
+	argv(argv),
+	config(config),
+	nround(config.numround),
+	nrepeat(config.numrepeat),
+	stepsize(config.stepsize),
+	a1(nullptr),
+	a2(nullptr),
+	coordinator_(nullptr)
+{
 }
 
-void Simulator::resetcoordinator() {
-	delete coordinator_;
-	coordinator_ = new Coordinator();
-}
-
-void Simulator::setcoordinator(int argc, char* argv[]) {
-
+void Simulator::set(){
+	coordinator_ = new sc2::Coordinator();
 #if !defined(__linux__)
 #ifdef SCREENCAPTURE
 	sc2::RenderSettings settings(800, 600, 300, 300);
@@ -305,105 +310,70 @@ void Simulator::setcoordinator(int argc, char* argv[]) {
 	coordinator_->SetRealtime(false);
 	coordinator_->SetMultithreaded(true);
 	coordinator_->SetStepSize(stepsize);
+
+	p1.setConfig(config.player1);
+	p2.setConfig(config.player2);
+	p1.combinator().set_config(config.combin1);
+	p2.combinator().set_config(config.combin2);
+
+	if (config.simmode == SimulatorConfig::SimMode::CvC) {
+		a1 = new Camerabot("CameraBot");
+		p1.setBot(a1, 2);
+		p2.setBot(a1, 3);
+		coordinator_->SetParticipants({
+			CreateParticipant(config.player1.race, a1)
+		});
+	}
+	else if (config.simmode == SimulatorConfig::SimMode::PvC) {
+		a1 = new Simbot("PlayerBot");
+		a2 = new Camerabot("CameraBot");
+		p1.setBot(a2, 1);
+		p2.setBot(a2, 3);
+		coordinator_->SetParticipants({
+			CreateParticipant(config.player1.race, a1),
+			CreateParticipant(config.player2.race, a2),
+		});
+	}
+	else {  // config.simmode == SimulatorConfig::SimMode::PvP
+		a1 = new Simbot("Player1Bot");
+		a2 = new Simbot("Player2Bot");
+		p1.setBot(a1);
+		p2.setBot(a2);
+		coordinator_->SetParticipants({
+			CreateParticipant(config.player1.race, a1),
+			CreateParticipant(config.player2.race, a2),
+		});
+	}
+	
+	coordinator_->SetPortStart(config.port);
+
+#if defined(__linux__)
+#ifdef SCREENCAPTURE
+#if LINUX_USE_SOFTWARE_RENDER
+	coordinator_->AddCommandLine("-osmesapath /usr/lib/x86_64-linux-gnu/libOSMesa.so");
+#else
+	coordinator_->AddCommandLine("-eglpath libEGL.so");
+#endif
+#endif // SCREENCAPTURE
+#endif // defined(__linux__)
 }
 
-Coordinator* Simulator::coordinator() {
+void Simulator::reset() {
+	delete coordinator_;
+	if (config.simmode == SimulatorConfig::SimMode::CvC) {
+		delete a1;
+	}
+	else if (config.simmode == SimulatorConfig::SimMode::PvC) {
+		delete a1;
+	}
+	else {  // config.simmode == SimulatorConfig::SimMode::PvP
+		delete a1;
+		delete a2;
+	}
+	set();
+}
+
+sc2::Coordinator* Simulator::coordinator() {
 	return coordinator_;
 }
 
-bool Simulator::IsSimulationFinished() {
-	return nround < cround;
-}
-
-void Simulator::SetSims(SimBot* sim1, SimBot* sim2) {
-	coordinator_->SetParticipants({
-	CreateParticipant(race_sim1, sim1),
-	CreateParticipant(race_sim2, sim2),
-		});
-	this->sim1 = sim1;
-	this->sim2 = sim2;
-}
-
-void Simulator::SetRaces(int32_t race) {
-	switch (race & 3) { // race p1
-	case RACE1T:
-		race_sim1 = Terran;
-		break;
-	case RACE1Z:
-		race_sim1 = Zerg;
-		break;
-	case RACE1P:
-		race_sim1 = Protoss;
-		break;
-	case RACE1R:
-	default:
-		race_sim1 = Random;
-		break;
-	}
-	switch (race & 12) {
-	case RACE2T:
-		race_sim2 = Terran;
-		break;
-	case RACE2Z:
-		race_sim2 = Zerg;
-		break;
-	case RACE2P:
-		race_sim2 = Protoss;
-		break;
-	case RACE2R:
-	default:
-		race_sim2 = Random;
-		break;
-	}
-}
-
-void Simulator::SetResources(int32_t ore, int32_t gas, int32_t food) {
-	this->ore = ore;
-	this->gas = gas;
-	this->food = food;
-}
-
-void Simulator::recordhead(const Json::Value& o_diff) {
-	o_text.clear();
-	o_text["stepsize"] = stepsize;
-	o_text["squad1"] = o_squad_sim1;
-	o_text["squad2"] = o_squad_sim2;
-	if (o_note.isArray()) {
-		o_text["note"] = o_note;
-	}
-	else {
-		o_text["note"].append("nothing");
-	}
-	o_text["limit"]["ore"] = static_cast<int>(ore);
-	o_text["limit"]["gas"] = static_cast<int>(gas);
-	o_text["limit"]["food"] = static_cast<int>(food);
-	o_text["diff"] = o_diff;
-}
-
-void Simulator::recordbody(const Json::Value& o_item) {
-	o_text["item"].append(o_item);
-}
-
-void Simulator::writefile() {
-	// json output 파일 크기 줄이기 (공백 지우기)
-	Json::StreamWriterBuilder builder;
-	builder["commentStyle"] = "None";
-	builder["indentation"] = "";
-	std::unique_ptr<Json::StreamWriter> const writer(
-		builder.newStreamWriter());
-	writer->write(o_text, &ofs_outputraw);
-	//ofs_outputraw << o_text;
-	if (cround <= nround) {
-		ofs_outputraw << "," << std::endl;
-	}
-
-	std::ofstream ofs_output_chunk("output/r_" + std::to_string(cround) + ".txt");
-	ofs_output_chunk << o_text;
-	ofs_output_chunk.close();
-	o_text.clear();
-}
-
-void Simulator::SetInputpath(const std::string& path) {
-	inputpath = path;
-	use_input = true;
-}
