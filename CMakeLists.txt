@@ -7,6 +7,7 @@ set(SC2CombatSim_VERSION_MINOR 0)
 
 set(PATH_MAPS "${PROJECT_SOURCE_DIR}/maps/")
 set(PATH_CONFIG "${PROJECT_SOURCE_DIR}/config/")
+set(PATH_OUTPUT "${PROJECT_SOURCE_DIR}/output/")
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/cmake/ProjectConfig.h.in"

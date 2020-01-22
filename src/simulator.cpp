@@ -1,5 +1,6 @@
 #include "simulator.h"
 
+#include "ProjectConfig.h"
 #include "bots.h"
 
 #include <sc2api/sc2_api.h>
@@ -220,7 +221,7 @@ int Simulator::Update() {
 			cbattle++;
 			crepeat++;
 			if (crepeat >= nrepeat) {
-				recorder.writefile("output/r_" + std::to_string(cround) + ".json");
+				recorder.writefile(PATH_OUTPUT "/r_" + std::to_string(cround) + ".json");
 				neednewsquad = true;
 				cround++; // after printing, count the rounds.
 			}
