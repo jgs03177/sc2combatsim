@@ -65,6 +65,7 @@ target_link_libraries(SC2CombatSim
   #general "${LIBRARY_RELS}"
 )
 
+set_property(TARGET SC2CombatSim PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 #set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 #set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
@@ -83,6 +84,7 @@ find_path(SC2Api_INCLUDE_DIR
         "sc2renderer/sc2_renderer.h"
         "sc2utils/sc2_manage_process.h"
     PATHS
+        "${PROJECT_SOURCE_DIR}/include"
         "/opt/local/include"
         "/usr/local/include"
         "/usr/include"
@@ -94,6 +96,7 @@ find_path(SC2Api_Proto_INCLUDE_DIR
     NAMES
         "s2clientprotocol/sc2api.pb.h"
     PATHS
+        "${PROJECT_SOURCE_DIR}/include"
         "/opt/local/include"
         "/usr/local/include"
         "/usr/include"
