@@ -71,8 +71,8 @@ int Simulator::Update() {
 	enum {
 		onstart,
 		onchange,
-		oncreate,
 		indelay,
+		oncreate,
 		increate,
 		oncheck,
 		oncount,
@@ -165,11 +165,11 @@ int Simulator::Update() {
 #if !defined(__linux__)
 #ifdef SCREENCAPTURE
 				const std::string imgname1 = 
-					"output/s" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png";
+					PATH_OUTPUT "/s" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png";
 				const std::string imgname2 = 
-					"output/s" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png";
+					PATH_OUTPUT "/s" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png";
 
-				// TODO: Move Camera Properly
+				// TODO: Move Camera Properly (on CvC)
 				p1.MoveCamera();
 				p1.ScreenCapture(imgname1);
 				p2.MoveCamera();
@@ -299,12 +299,12 @@ Simulator::Simulator(int argc, char* argv[], const SimulatorConfig& config) :
 
 void Simulator::set(){
 	coordinator_ = new sc2::Coordinator();
-#if !defined(__linux__)
 #ifdef SCREENCAPTURE
+#if !defined(__linux__)
 	sc2::RenderSettings settings(800, 600, 300, 300);
 	coordinator_->SetRender(settings);
-#endif // SCREENCAPTURE
 #endif // !defined(__linux__)
+#endif // SCREENCAPTURE
 
 	coordinator_->LoadSettings(argc, argv);
 	coordinator_->SetWindowSize(960, 720);
@@ -319,8 +319,8 @@ void Simulator::set(){
 
 	if (config.simmode == SimulatorConfig::SimMode::CvC) {
 		a1 = new Camerabot("CameraBot");
-		p1.setBot(a1, 2);
-		p2.setBot(a1, 3);
+		p1.setBot(a1, 3);
+		p2.setBot(a1, 4);
 		coordinator_->SetParticipants({
 			CreateParticipant(config.player1.race, a1)
 		});
@@ -328,8 +328,8 @@ void Simulator::set(){
 	else if (config.simmode == SimulatorConfig::SimMode::PvC) {
 		a1 = new Simbot("PlayerBot");
 		a2 = new Camerabot("CameraBot");
-		p1.setBot(a2, 1);
-		p2.setBot(a2, 3);
+		p1.setBot(a1, 1);
+		p2.setBot(a2, 5);
 		coordinator_->SetParticipants({
 			CreateParticipant(config.player1.race, a1),
 			CreateParticipant(config.player2.race, a2),
@@ -338,8 +338,8 @@ void Simulator::set(){
 	else {  // config.simmode == SimulatorConfig::SimMode::PvP
 		a1 = new Simbot("Player1Bot");
 		a2 = new Simbot("Player2Bot");
-		p1.setBot(a1);
-		p2.setBot(a2);
+		p1.setBot(a1, 1);
+		p2.setBot(a2, 2);
 		coordinator_->SetParticipants({
 			CreateParticipant(config.player1.race, a1),
 			CreateParticipant(config.player2.race, a2),
@@ -348,15 +348,15 @@ void Simulator::set(){
 	
 	coordinator_->SetPortStart(config.port);
 
-#if defined(__linux__)
 #ifdef SCREENCAPTURE
+#if defined(__linux__)
 #if LINUX_USE_SOFTWARE_RENDER
 	coordinator_->AddCommandLine("-osmesapath /usr/lib/x86_64-linux-gnu/libOSMesa.so");
 #else
 	coordinator_->AddCommandLine("-eglpath libEGL.so");
-#endif
-#endif // SCREENCAPTURE
+#endif // LINUX_USE_SOFTWARE_RENDER
 #endif // defined(__linux__)
+#endif // SCREENCAPTURE
 }
 
 void Simulator::reset() {

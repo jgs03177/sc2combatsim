@@ -295,7 +295,7 @@ bool Combinator::pick_and_rearrange_candidates(float probability){
 		}
 	}
 	// shuffle
-	std::random_shuffle(squad_unittypeid.begin(), squad_unittypeid.end());
+	std::shuffle(squad_unittypeid.begin(), squad_unittypeid.end(), device);
 	return true;
 }
 

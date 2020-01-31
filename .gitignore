@@ -5,3 +5,5 @@ include/*
 !include/README.md
 config/*
 !config/README.md
+output/*
+!output/README.md
