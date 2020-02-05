@@ -40,17 +40,10 @@ public:
 
 	size_t CountPlayerUnit() const;
 
-	void PlacedUnit(
-		std::vector<sc2::UnitTypeID>& squad_unittypeid,
-		std::vector<int>& squad_quantity
-	) const;
+	std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> > GetPlacedUnit() const;
 
 	// Get list of units (seen) owned by player
-	void PlacedUnit(
-		std::vector<sc2::UnitTypeID>& squad_unittypeid,
-		std::vector<int>& squad_quantity, 
-		uint32_t playerID
-	) const;
+	std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> > GetPlacedUnit(uint32_t playerID) const;
 
 	// Put unit owned by player (need to send debug)
 	void DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, uint32_t playerID);

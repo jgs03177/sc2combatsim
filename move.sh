@@ -26,4 +26,4 @@ sudo cp ${build_directory}/bin/libsc2lib.a /opt/local/lib/sc2api
 sudo cp ${build_directory}/bin/libsc2protocol.a /opt/local/lib/sc2api
 sudo cp ${build_directory}/bin/libsc2utils.a /opt/local/lib/sc2api
 
-
+echo "done!"

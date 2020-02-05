@@ -240,10 +240,8 @@ void Combinator::add_resources(int mineral, int gas, float food) {
 	this->food += food;
 }
 
-void Combinator::get_resources(int& mineral, int& gas, float& food) const {
-	mineral = this->mineral;
-	gas = this->gas;
-	food = this->food;
+std::tuple<int, int, float> Combinator::get_resources() const {
+	return std::make_tuple(mineral, gas, food);
 }
 
 void Combinator::clear_unitlist(){
@@ -265,17 +263,19 @@ void Combinator::add_unitlist(int index){
 	}
 }
 
+void Combinator::add_unitlist(const std::string& unitname) {
+	sc2::UnitTypeID id = NameToUnitTypeID(unitname);
+	this->candidates.push_back(id);
+}
+
 void Combinator::add_unitlist(const std::vector<sc2::UnitTypeID>& new_candidates){
 	this->candidates.insert(this->candidates.end(),
 	                        new_candidates.begin(),
 						    new_candidates.end());
 }
 
-void Combinator::get_unitlist(std::vector<sc2::UnitTypeID>& out_candidates) const{
-	out_candidates.clear();
-	out_candidates.insert(out_candidates.begin(),
-	                      this->candidates.begin(),
-						  this->candidates.end());
+std::vector<sc2::UnitTypeID> Combinator::get_unitlist() const{
+	return candidates;
 }
 
 bool Combinator::pick_and_rearrange_candidates(float probability){
@@ -376,9 +376,8 @@ float Combinator::get_unit_affordable(sc2::UnitTypeID unittypeid, int32_t minera
 	return std::max(n_min, 0.0f);
 }
 
-void Combinator::get_squad(std::vector<sc2::UnitTypeID>& squad_unittypeid, std::vector<int>& squad_quantity) const {
-	squad_unittypeid = this->squad_unittypeid;
-	squad_quantity = this->squad_quantity;
+std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> > Combinator::get_squad() const {
+	return std::make_tuple(squad_unittypeid, squad_quantity);
 };
 
 // get max number of the given unit that we can buy with the given resource.
@@ -426,4 +425,12 @@ sc2::UnitTypeID Combinator::NameToUnitTypeID(const std::string& name) const {
 	std::cerr << "Fatal Error: unit name " << name << " not found!" << std::endl;
 	exit(-1);
 	return 0;
+}
+
+void Combinator::load_predefined_squad(
+	const std::vector<sc2::UnitTypeID>& squad_unittypeid,
+	const std::vector<int>& squad_quantity
+) {
+	this->squad_unittypeid = squad_unittypeid;
+	this->squad_quantity = squad_quantity;
 }

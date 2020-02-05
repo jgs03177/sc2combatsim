@@ -1,5 +1,7 @@
 #include "configurator.h"
 
+#include "ProjectConfig.h"
+
 #include "json/json.h"
 
 #include <iostream>
@@ -44,7 +46,7 @@ void PlayerConfig::dump(Json::Value& o_playerconfig) const {
 
 void PlayerConfig::use_default(bool right) {
 	race = sc2::Race::Random;
-	offset = right? sc2::Vector2D(10, 0) : sc2::Vector2D(-10, 0);
+	offset = right? sc2::Vector2D(20, 0) : sc2::Vector2D(-20, 0);
 }
 
 SimulatorConfig::SimulatorConfig() {
@@ -59,6 +61,9 @@ void SimulatorConfig::use_default(){
 	numround = 2000;
 	numrepeat = 5;
 	stepsize = 5;
+	mapname = PATH_MAP;
+	outpath = PATH_OUTPUT;
+	squadpath = "";
 
 	combin1.use_default();
 	combin2.use_default();
@@ -109,7 +114,9 @@ void SimulatorConfig::load(const Json::Value& o_config) {
 	numrepeat = o_config["numrepeat"].asInt();
 	stepsize = o_config["stepsize"].asInt();
 	port = o_config["port"].asInt();
-	mapname = o_config["mapname"].asString();
+	mapname = o_config.get("mapname", PATH_MAP).asString();
+	outpath = o_config.get("outpath", PATH_OUTPUT).asString();
+	squadpath = o_config.get("squadpath", "").asString();
 
 	std::string s_simmode = o_config["simmode"].asString();
 
@@ -148,6 +155,8 @@ void SimulatorConfig::dump(Json::Value& o_config) const {
 	o_config["stepsize"] = stepsize;
 	o_config["port"] = port;
 	o_config["mapname"] = mapname;
+	o_config["outpath"] = outpath;
+	o_config["squadpath"] = squadpath;
 
 	switch (simmode) {
 	case SimMode::PvP:

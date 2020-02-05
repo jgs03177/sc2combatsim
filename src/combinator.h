@@ -27,7 +27,7 @@ public:
 	// step 1b (additional) - set unitlists
 	void clear_unitlist();
 	void add_unitlist(int index); // predefined index
-	void add_unitlist(const std::string& candidate); // name
+	void add_unitlist(const std::string& unitname); // name
 	void add_unitlist(const std::vector<sc2::UnitTypeID>& candidates); // unittypeids
 
 	// step 2 - priorities are mixed
@@ -38,12 +38,15 @@ public:
 	bool make_squad_simultaneous();
 
 	// step 4 - get all infos
-	void get_resources(int& mineral, int& gas, float& food) const;
-	void get_unitlist(std::vector<sc2::UnitTypeID>& candidates) const;
-	void get_squad(std::vector<sc2::UnitTypeID>& squad_unittypeid, std::vector<int>& squad_quantity) const;
+	std::tuple<int, int, float> get_resources() const;
+	std::vector<sc2::UnitTypeID> get_unitlist() const;
+	std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> > get_squad() const;
 
 	// load/dump
-	bool read_from_path(const std::string& path);
+	void load_predefined_squad(
+		const std::vector<sc2::UnitTypeID>& squad_unittypeid, 
+		const std::vector<int>& squad_quantity
+	);
 
 private:
     bool use_config = false;

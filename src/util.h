@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sc2api/sc2_api.h>
+
 #include <string>
 
 namespace Util {
@@ -9,4 +11,6 @@ namespace Util {
 
 	// Get filename timestring.
 	std::string gettimestr();
+
+	std::tuple<std::vector<sc2::UnitTypeID>, std::vector<int>, std::vector<sc2::UnitTypeID>, std::vector<int> > read(const std::string& path);
 }

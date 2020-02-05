@@ -1,6 +1,18 @@
 #add_library(lodepng STATIC lodepng)
 add_executable(SC2CombatSim
-   main.cpp
+   main.cpp         ../generated/ProjectConfig.h
+   player.cpp       player.h
+   bots.cpp         bots.h
+   simulator.cpp    simulator.h
+   combinator.cpp   combinator.h
+   recorder.cpp     recorder.h
+   configurator.cpp configurator.h
+   util.cpp         util.h
+   lodepng.cpp      lodepng.h
+   jsoncpp.cpp      json/json.h     json/json-forwards.h
+)
+add_executable(SC2SquadGen
+   squadgen.cpp     ../generated/ProjectConfig.h
    player.cpp       player.h
    bots.cpp         bots.h
    simulator.cpp    simulator.h
@@ -65,16 +77,25 @@ target_link_libraries(SC2CombatSim
   #general "${LIBRARY_RELS}"
 )
 
+target_link_libraries(SC2SquadGen
+  debug "${LIBRARY_DEBUGS}"
+  optimized "${LIBRARY_RELS}"
+  #general "${LIBRARY_RELS}"
+)
+
 set_property(TARGET SC2CombatSim PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set_property(TARGET SC2SquadGen PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 #set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 #set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
 if (APPLE)
   target_link_libraries(SC2CombatSim "-framework Carbon")
+  target_link_libraries(SC2SquadGen "-framework Carbon")
 endif ()
 
 if (UNIX AND NOT APPLE)
   target_link_libraries(SC2CombatSim pthread dl)
+  target_link_libraries(SC2SquadGen pthread dl)
 endif ()
 
 # Find main Api headers.

@@ -42,6 +42,8 @@ public:
 	int32_t stepsize;
 	int32_t port;
 	std::string mapname;
+	std::string outpath;
+	std::string squadpath;
 	enum class SimMode { PvP, PvC, CvC, unknown =-1 } simmode;
 
 	CombinatorConfig  combin1;

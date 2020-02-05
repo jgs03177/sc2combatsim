@@ -1,14 +1,14 @@
 #include "simulator.h"
 
-#include "ProjectConfig.h"
 #include "bots.h"
+#include "util.h"
 
 #include <sc2api/sc2_api.h>
 #include <sc2utils/sc2_manage_process.h>
 
 #include <iostream>
 
-#define SCREENCAPTURE
+//#define SCREENCAPTURE
 
 int Simulator::Begin() {
 
@@ -92,7 +92,7 @@ int Simulator::Update() {
 	int32_t cdelay = 0;
 
 	while (coordinator_->Update()) {
-		std::cout << simflag << std::endl;
+		std::cout << std::hex << simflag << std::dec << std::flush;
 #if !defined(__linux__)
 		sc2::SleepFor(1);	// to reduce load to cpu and prevent disconnection.
 #endif
@@ -113,15 +113,25 @@ int Simulator::Update() {
 		// fetch battles randomly
 		case onchange: {
 			if (neednewsquad) {
-				if(false){
-				//if (use_input){
-					//p1.construct_squad_from_file();
-					//p2.construct_squad_from_file();
+				if (config.squadpath.compare("") != 0){
+					std::vector<sc2::UnitTypeID> squad_unittypeid1, squad_unittypeid2;
+					std::vector<int> squad_quantity1, squad_quantity2;
+
+					std::string path = config.squadpath + "/b_" + std::to_string(cround - 1) + ".txt";
+					std::tie(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2) = Util::read(path);
+					p1.combinator().clear_unitlist();
+					p1.combinator().reset();
+					p1.combinator().load_predefined_squad(squad_unittypeid1, squad_quantity1);
+					p2.combinator().clear_unitlist();
+					p2.combinator().reset();
+					p2.combinator().load_predefined_squad(squad_unittypeid2, squad_quantity2);
 				}
 				else{
+					p1.combinator().clear_unitlist();
 					p1.combinator().reset();
 					p1.combinator().pick_and_rearrange_candidates();
 					p1.combinator().make_squad();
+					p2.combinator().clear_unitlist();
 					p2.combinator().reset();
 					p2.combinator().pick_and_rearrange_candidates();
 					p2.combinator().make_squad();
@@ -131,8 +141,8 @@ int Simulator::Update() {
 				crepeat = 0;
 			}
 
-			cdelay = 0;
 #if !defined(__linux__)
+			cdelay = 0;
 			simflag = indelay;
 #else
 			simflag = oncreate;
@@ -165,9 +175,9 @@ int Simulator::Update() {
 #if !defined(__linux__)
 #ifdef SCREENCAPTURE
 				const std::string imgname1 = 
-					PATH_OUTPUT "/s" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png";
+					config.outpath + "/s" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png";
 				const std::string imgname2 = 
-					PATH_OUTPUT "/s" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png";
+					config.outpath + "/s" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png";
 
 				// TODO: Move Camera Properly (on CvC)
 				p1.MoveCamera();
@@ -190,7 +200,7 @@ int Simulator::Update() {
 			}
 			// battle ends
 			else {
-				std::cout << "elapsed frames: " << cframe << std::endl;
+				std::cout << " elapsed frames: " << cframe << std::endl;
 				simflag = oncount;
 				break;
 			}
@@ -221,7 +231,8 @@ int Simulator::Update() {
 			cbattle++;
 			crepeat++;
 			if (crepeat >= nrepeat) {
-				recorder.writefile(PATH_OUTPUT "/r_" + std::to_string(cround) + ".json");
+				recorder.writefile(config.outpath + "/r_" + std::to_string(cround) + ".json");
+				recorder.clear();
 				neednewsquad = true;
 				cround++; // after printing, count the rounds.
 			}
@@ -252,9 +263,12 @@ int Simulator::Update() {
 		}
 		// simulation end
 		case onfinish: {
-			p1.LeaveGame();
-			p2.LeaveGame();
+			coordinator_->LeaveGame();
+			if (p1.Bot() == p2.Bot()) {
+				p1.Bot()->Control()->RequestQuit();
+			}
 
+			cdelay = 0;
 			simflag = infinish;
 			break;
 		}
@@ -271,8 +285,12 @@ int Simulator::Update() {
 		}
 
 		p1.SendDebug();
-		p2.SendDebug();
+		if (p1.Bot() != p2.Bot()) {
+			p2.SendDebug();
+		}
 	}
+
+	std::cout << "end of a game." << std::endl;
 
 	return 0;
 }

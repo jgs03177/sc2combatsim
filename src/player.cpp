@@ -64,16 +64,13 @@ size_t Player::CountPlayerUnit() const {
 	).size();
 }
 
-void Player::PlacedUnit(
-	std::vector<sc2::UnitTypeID>& squad_unittypeid,
-	std::vector<int>& squad_quantity) const {
-	PlacedUnit(squad_unittypeid, squad_quantity, playerID);
+std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> >
+Player::GetPlacedUnit() const {
+	return GetPlacedUnit(playerID);
 }
 
-void Player::PlacedUnit(
-	std::vector<sc2::UnitTypeID>& squad_unittypeid,
-	std::vector<int>& squad_quantity,
-	uint32_t playerID) const {
+std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> >
+Player::GetPlacedUnit(uint32_t playerID) const {
 	sc2::Units myunits = Bot()->Observation()->GetUnits(
 		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; });
 	// make a map
@@ -86,14 +83,15 @@ void Player::PlacedUnit(
 		unit_map[id] += 1;
 	}
 	size_t length = unit_map.size();
-	squad_unittypeid.clear();
+	std::vector<sc2::UnitTypeID> squad_unittypeid;
+	std::vector<int> squad_quantity;
 	squad_unittypeid.reserve(length);
-	squad_quantity.clear();
 	squad_quantity.reserve(length);
 	for (const auto& e : unit_map) {
 		squad_unittypeid.push_back(e.first);
 		squad_quantity.push_back(e.second);
 	}
+	return std::make_tuple(squad_unittypeid, squad_quantity);
 }
 
 void Player::DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, uint32_t playerID) {
@@ -120,7 +118,7 @@ void Player::DeployUnit(
 void Player::DeployUnit() {
 	std::vector<sc2::UnitTypeID> squad_unittypeid;
 	std::vector<int> squad_quantity;
-	combinator_.get_squad(squad_unittypeid, squad_quantity);
+	std::tie(squad_unittypeid, squad_quantity) = combinator_.get_squad();
 	DeployUnit(squad_unittypeid, squad_quantity, centerpos + config.offset, playerID);
 }
 

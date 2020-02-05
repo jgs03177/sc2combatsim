@@ -37,4 +37,5 @@ public:
 	void reset();
 	int Begin();
 	int Update();
+	void squadgen();
 };

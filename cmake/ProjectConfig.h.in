@@ -1,5 +1,5 @@
 #define SC2CombatSim_VERSION_MAJOR @SC2CombatSim_VERSION_MAJOR@
 #define SC2CombatSim_VERSION_MINOR @SC2CombatSim_VERSION_MINOR@
 #define PATH_CONFIG "@PATH_CONFIG@/config.json"
-#define PATH_MAPS "@PATH_MAPS@/Example/Simulation.SC2Map"
+#define PATH_MAP "@PATH_MAPS@/Simulation.SC2Map"
 #define PATH_OUTPUT "@PATH_OUTPUT@"

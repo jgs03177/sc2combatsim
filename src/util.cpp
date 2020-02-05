@@ -3,6 +3,8 @@
 #include "lodepng.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <iomanip>
 
@@ -45,4 +47,57 @@ std::string Util::gettimestr() {
 		<< std::setw(2) << std::setfill('0') << timeinfo.tm_sec;
 	return o.str();
     */
+}
+
+std::tuple<std::vector<sc2::UnitTypeID>, std::vector<int>, std::vector<sc2::UnitTypeID>, std::vector<int> >
+Util::read(const std::string& path) {
+    std::ifstream fin;
+
+    std::vector<sc2::UnitTypeID> squad_unittypeid1;
+    std::vector<int> squad_quantity1;
+    std::vector<sc2::UnitTypeID> squad_unittypeid2;
+    std::vector<int> squad_quantity2;
+
+    std::string line;
+    std::stringstream linestream;
+    std::string buffer;
+    
+    std::cout << "\nReading sqauds from : " << path << std::endl;
+    fin.open(path);
+    if (!fin.good()) {
+        std::cout << "Failed to open file." << std::endl;
+        fin.close();
+        exit(1);
+    }
+
+    std::getline(fin, line);
+    std::cout << line << std::endl;
+    linestream << line;
+    while (std::getline(linestream, buffer, ' ')) {
+        squad_unittypeid1.push_back(std::stoi(buffer));
+    }
+    linestream.clear();
+    std::getline(fin, line);
+    std::cout << line << std::endl;
+    linestream << line;
+    while (std::getline(linestream, buffer, ' ')) {
+        squad_quantity1.push_back(std::stoi(buffer));
+    }
+    linestream.clear();
+    std::getline(fin, line);
+    std::cout << line << std::endl;
+    linestream << line;
+    while (std::getline(linestream, buffer, ' ')) {
+        squad_unittypeid2.push_back(std::stoi(buffer));
+    }
+    linestream.clear();
+    std::getline(fin, line);
+    std::cout << line << std::endl;
+    linestream << line;
+    while (std::getline(linestream, buffer, ' ')) {
+        squad_quantity2.push_back(std::stoi(buffer));
+    }
+    fin.close();
+    std::cout << squad_unittypeid1.size() << squad_quantity1.size() << squad_unittypeid2.size() << squad_quantity2.size() << std::endl;
+    return std::make_tuple(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2);
 }

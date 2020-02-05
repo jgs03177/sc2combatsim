@@ -10,6 +10,7 @@
 
 #include <string>
 #include <fstream>
+#include <cassert>
 
 Recorder::Recorder() {
 	std::string timestr = Util::gettimestr();
@@ -51,22 +52,22 @@ void Recorder::record_combination(const Player& player1, const Player& player2) 
 	float food;
 
     // Record remaining resources of players
-	player1.combinator().get_resources(mineral, gas, food);
+	std::tie(mineral, gas, food) = player1.combinator().get_resources();
 	o_rscleft_p1[0u] = mineral;
 	o_rscleft_p1[1u] = gas;
 	o_rscleft_p1[2u] = food;
 
-	player2.combinator().get_resources(mineral, gas, food);
+	std::tie(mineral, gas, food) = player2.combinator().get_resources();
 	o_rscleft_p2[0u] = mineral;
 	o_rscleft_p2[1u] = gas;
 	o_rscleft_p2[2u] = food;
 
 	// Record squads of players
-	player1.combinator().get_squad(squad_unittypeid, squad_quantity);
+	std::tie(squad_unittypeid, squad_quantity) = player1.combinator().get_squad();
 	o_comb_p1 = dump_squad(squad_unittypeid, squad_quantity);
 	squad_unittypeid.clear();
 	squad_quantity.clear();
-	player2.combinator().get_squad(squad_unittypeid, squad_quantity);
+	std::tie(squad_unittypeid, squad_quantity) = player2.combinator().get_squad();
 	o_comb_p2 = dump_squad(squad_unittypeid, squad_quantity);
 }
 
@@ -86,11 +87,11 @@ void Recorder::record_result(const Player& player1, const Player& player2,
 	o_frame = cframe;
 
 	// Record squads of players
-	player1.PlacedUnit(squad_unittypeid, squad_quantity);
+	std::tie(squad_unittypeid, squad_quantity) = player1.GetPlacedUnit();
 	o_remain_p1 = dump_squad(squad_unittypeid, squad_quantity);
 	squad_unittypeid.clear();
 	squad_quantity.clear();
-	player2.PlacedUnit(squad_unittypeid, squad_quantity);
+	std::tie(squad_unittypeid, squad_quantity) = player2.GetPlacedUnit();
 	o_remain_p2 = dump_squad(squad_unittypeid, squad_quantity);
 
 	o_items.append(o_item);
@@ -111,4 +112,10 @@ void Recorder::writefile(const std::string& filename) const {
 	std::ofstream ofs_output(filename);
 	writer->write(o_text, &ofs_output);
 	ofs_output.close();
+}
+
+void Recorder::clear() {
+	o_config.clear();
+	o_combination.clear();
+	o_items.clear();
 }
