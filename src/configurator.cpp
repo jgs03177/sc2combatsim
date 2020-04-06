@@ -114,6 +114,7 @@ void SimulatorConfig::load(const Json::Value& o_config) {
 	numrepeat = o_config["numrepeat"].asInt();
 	stepsize = o_config["stepsize"].asInt();
 	port = o_config["port"].asInt();
+	squadoffset = o_config.get("squadoffset", 0).asInt();
 	mapname = o_config.get("mapname", PATH_MAP).asString();
 	outpath = o_config.get("outpath", PATH_OUTPUT).asString();
 	squadpath = o_config.get("squadpath", "").asString();
@@ -154,6 +155,7 @@ void SimulatorConfig::dump(Json::Value& o_config) const {
 	o_config["numrepeat"] = numrepeat;
 	o_config["stepsize"] = stepsize;
 	o_config["port"] = port;
+	o_config["squadoffset"] = squadoffset;
 	o_config["mapname"] = mapname;
 	o_config["outpath"] = outpath;
 	o_config["squadpath"] = squadpath;

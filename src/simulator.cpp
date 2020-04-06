@@ -85,7 +85,7 @@ int Simulator::Update() {
 	// nframe: frame limit for timeout
 	// nbattle: battle limit for one sc2 process. total process time < 6:07:09
 	const int32_t nframe = 10000 / stepsize;	// currently 5.5minutes
-	const int32_t nbattle = 200;
+	const int32_t nbattle = 500; // 200
 	const int32_t ndelay = 5;
 	int32_t cframe = 0;
 	int32_t cbattle = 0;
@@ -117,7 +117,7 @@ int Simulator::Update() {
 					std::vector<sc2::UnitTypeID> squad_unittypeid1, squad_unittypeid2;
 					std::vector<int> squad_quantity1, squad_quantity2;
 
-					std::string path = config.squadpath + "/b_" + std::to_string(cround - 1) + ".txt";
+					std::string path = config.squadpath + "/b_" + std::to_string(config.squadoffset + cround - 1) + ".txt";
 					std::tie(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2) = Util::read(path);
 					p1.combinator().clear_unitlist();
 					p1.combinator().reset();
@@ -175,9 +175,9 @@ int Simulator::Update() {
 #if !defined(__linux__)
 #ifdef SCREENCAPTURE
 				const std::string imgname1 = 
-					config.outpath + "/s" + std::to_string(cround) + "_a" + std::to_string(crepeat) + ".png";
+					config.outpath + "/s" + std::to_string(config.squadoffset + cround) + "_a" + std::to_string(crepeat) + ".png";
 				const std::string imgname2 = 
-					config.outpath + "/s" + std::to_string(cround) + "_b" + std::to_string(crepeat) + ".png";
+					config.outpath + "/s" + std::to_string(config.squadoffset + cround) + "_b" + std::to_string(crepeat) + ".png";
 
 				// TODO: Move Camera Properly (on CvC)
 				p1.MoveCamera();
@@ -231,7 +231,7 @@ int Simulator::Update() {
 			cbattle++;
 			crepeat++;
 			if (crepeat >= nrepeat) {
-				recorder.writefile(config.outpath + "/r_" + std::to_string(cround) + ".json");
+				recorder.writefile(config.outpath + "/r_" + std::to_string(config.squadoffset + cround) + ".json");
 				recorder.clear();
 				neednewsquad = true;
 				cround++; // after printing, count the rounds.
@@ -264,9 +264,6 @@ int Simulator::Update() {
 		// simulation end
 		case onfinish: {
 			coordinator_->LeaveGame();
-			if (p1.Bot() == p2.Bot()) {
-				p1.Bot()->Control()->RequestQuit();
-			}
 
 			cdelay = 0;
 			simflag = infinish;

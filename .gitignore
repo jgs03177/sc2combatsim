@@ -7,3 +7,4 @@ config/*
 !config/README.md
 output/*
 !output/README.md
+/build_linux

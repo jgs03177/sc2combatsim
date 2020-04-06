@@ -193,6 +193,8 @@ void dirichlet1(int k, std::vector<float>& ratios) {
 	}
 }
 
+// Beta(1, k)
+// see (https://en.wikipedia.org/wiki/Dirichlet_distribution#Marginal_beta_distributions)
 float beta1k(int k) {
 	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
 	float u = distribution(generator);

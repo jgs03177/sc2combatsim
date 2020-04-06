@@ -41,6 +41,7 @@ public:
 	int32_t numrepeat;
 	int32_t stepsize;
 	int32_t port;
+	int32_t squadoffset;
 	std::string mapname;
 	std::string outpath;
 	std::string squadpath;
