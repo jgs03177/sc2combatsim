@@ -5,6 +5,10 @@
 #include "json/json.h"
 
 #include <iostream>
+#include <vector>
+#include <random>
+
+std::random_device device2;
 
 void Player::setBot(sc2::Agent* agent) {
 	this->agent_ = agent;
@@ -101,25 +105,37 @@ void Player::DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D po
 }
 
 void Player::DeployUnit(
-	const std::vector<sc2::UnitTypeID>& squad_unittypeid, const std::vector<int>& squad_quantity,
-	sc2::Vector2D pos, uint32_t playerID) {
+	const std::vector<sc2::UnitTypeID>& squad_unittypeid,
+	const std::vector<int>& squad_quantity,
+	sc2::Vector2D pos,
+	uint32_t playerID,
+	bool shuffle
+) {
 	sc2::DebugInterface* debug = Bot()->Debug();
 	size_t length = squad_unittypeid.size();
 	assert(length == squad_quantity.size());
+	std::vector<int> random_index(length, 0);
 	for (int i = 0; i < length; i++) {
-		int quantity = squad_quantity[i];
+		random_index[i] = i;
+	}
+	if (shuffle) {
+		std::shuffle(random_index.begin(), random_index.end(), device2);
+	}
+	for (int i = 0; i < length; i++) {
+		int index = random_index[i];
+		int quantity = squad_quantity[index];
 		if (!quantity) continue;
-		sc2::UnitTypeID unittypeID = squad_unittypeid[i];
+		sc2::UnitTypeID unittypeID = squad_unittypeid[index];
 		debug->DebugCreateUnit(unittypeID, pos, playerID, quantity);
 	}
 	//debug->SendDebug();
 }
 
-void Player::DeployUnit() {
+void Player::DeployUnit(bool shuffle) {
 	std::vector<sc2::UnitTypeID> squad_unittypeid;
 	std::vector<int> squad_quantity;
 	std::tie(squad_unittypeid, squad_quantity) = combinator_.get_squad();
-	DeployUnit(squad_unittypeid, squad_quantity, centerpos + config.offset, playerID);
+	DeployUnit(squad_unittypeid, squad_quantity, centerpos + config.offset, playerID, shuffle);
 }
 
 void Player::KillPlayerUnit(uint32_t playerID) {

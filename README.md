@@ -1,21 +1,66 @@
 
 # StarCraft 2 Combat Simulator
 
+### Installation
+
+#### Windows
+Get Starcraft binary from the blizzard homepage.
+Get [git](https://git-scm.com/downloads).
+Get [cmake](https://cmake.org/download/).
+
+Get s2client-api fork. The document can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
+
 ```
-# Install SC2 API headers
-$ sudo mkdir -p /opt/local/include
-$ sudo cp -R include/{sc2api,sc2renderer,sc2utils} /opt/local/include
-$ sudo cp -R build/generated/s2clientprotocol /opt/local/include
-
-# Install protobuf headers
-$ sudo cp -R contrib/protobuf/src/google /opt/local/include/sc2api
-
-# Install SC2 API libraries
-$ sudo mkdir -p /opt/local/lib/sc2api
-$ sudo cp build/bin/{libcivetweb,libprotobuf,libsc2api,libsc2lib,libsc2protocol,libsc2utils}.a /opt/local/lib/sc2api
+git clone https://github.com/Blizzard/s2client-api.git && cd s2client-api
+mkdir build && cd build
+cmake ..
 ```
 
-## Dependencies
+Build with Visual Studio to get the libraries, and move the libraries.
+
+```
+move
+```
+
+Get this repository.
+
+```
+git clone sc2combatsim && cd sc2combatsim
+mkdir build && cd build
+cmake ..
+```
+
+Finally, build with Visual Studio.
+
+#### Linux
+Get [StarCraft Linux binary](https://github.com/Blizzard/s2client-proto#downloads).
+Get [git](https://git-scm.com/downloads).
+Get [cmake](https://cmake.org/download/).
+
+Get s2client-api fork. The document can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
+
+```
+git clone https://github.com/Blizzard/s2client-api.git && cd s2client-api
+mkdir build && cd build
+cmake ..
+make
+sh move.sh
+```
+
+make these libraries and move.
+
+Get this repository.
+
+```
+git clone sc2combatsim && cd sc2combatsim
+mkdir build && cd build
+cmake ..
+make
+```
+
+make and execute.
+
+### Dependencies
 
 [s2client-api](https://github.com/Blizzard/s2client-api)
 
@@ -23,7 +68,7 @@ $ sudo cp build/bin/{libcivetweb,libprotobuf,libsc2api,libsc2lib,libsc2protocol,
 
 [jsoncpp](https://github.com/open-source-parsers/jsoncpp)
 
-## Links
+### Useful Links
 
 [s2client-proto](https://github.com/Blizzard/s2client-proto)
 
@@ -38,3 +83,6 @@ $ sudo cp build/bin/{libcivetweb,libprotobuf,libsc2api,libsc2lib,libsc2protocol,
 [Galaxy Editor Reference](https://mapster.talv.space/galaxy/reference)
 
 [Battle.net API](https://develop.battle.net/)
+
+### known issues:
+WSL (Windows Subsystem for Linux) can run this simulator, but it stops running in about 1 day.

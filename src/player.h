@@ -53,11 +53,12 @@ public:
 		const std::vector<sc2::UnitTypeID>& squad_unittypeid,
 		const std::vector<int>& squad_quantity, 
 		sc2::Vector2D pos,
-		uint32_t playerID
+		uint32_t playerID,
+		bool shuffle=true
 	);
 
 	// Put list of units as predefined way.
-	void DeployUnit();
+	void DeployUnit(bool shuffle=true);
 
 	// Kill all (seen) units owned by player (need to send debug)
 	void KillPlayerUnit(uint32_t playerID);
