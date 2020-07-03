@@ -2,10 +2,10 @@ StarCraft 2 Combat Simulator
 ----------------------------
 
 ### Prerequisite
-+ [git](https://git-scm.com/downloads).
-+ [cmake](https://cmake.org/download/).
++ [git](https://git-scm.com/downloads)
++ [cmake](https://cmake.org/download/)
 + Install Starcraft binary from Blizzard (Windows)
-+ or [StarCraft Linux binary](https://github.com/Blizzard/s2client-proto#downloads).
++ or [StarCraft binary (Linux)](https://github.com/Blizzard/s2client-proto#downloads)
 
 ### Installation
 
@@ -14,7 +14,7 @@ StarCraft 2 Combat Simulator
 Starting from the main directory, clone s2client-api fork, and build the code with cmake. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
 
 ```
-git clone https://github.com/jgs03177/s2client-api && cd s2client-api
+git clone https://github.com/jgs03177/s2client-api.git && cd s2client-api
 mkdir build && cd build
 cmake ..
 ```
@@ -25,7 +25,7 @@ Go back to the main directory and clone this project (StarCraft 2 Combat Simulat
 
 ```
 cd ../..
-git clone https://github.com/jgs03177/sc2combatsim && sc2combatsim
+git clone https://github.com/jgs03177/sc2combatsim.git && cd sc2combatsim
 ../s2client-api/synchproject.bat
 move.bat
 mkdir build && cd build
@@ -38,7 +38,7 @@ Finally, build with Visual Studio and execute the generated `sc2combatsim.exe`.
 Starting from the main directory, clone s2client-api fork and build the code. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
 
 ```
-git clone https://github.com/Blizzard/s2client-api.git && cd s2client-api
+git clone https://github.com/jgs03177/s2client-api.git && cd s2client-api
 mkdir build && cd build
 cmake ..
 make
@@ -48,7 +48,7 @@ Go back to the main directory and clone this project (StarCraft 2 Combat Simulat
 
 ```
 cd ../..
-git clone https://github.com/jgs03177/sc2combatsim && sc2combatsim
+git clone https://github.com/jgs03177/sc2combatsim.git && cd sc2combatsim
 sh move.sh
 mkdir build && cd build
 cmake ..
@@ -126,13 +126,11 @@ You can modify simulation settings by modifying `config/config.json`.
 }
 ```
 
-+ Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning
-
-https://github.com/jgs03177/pcooa-sc2
++ Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning [Link](https://github.com/jgs03177/pcooa-sc2)
 
 ### Dependencies
 
-This project contains code from
+This project contains code from:
 
 + [lodepng](https://lodev.org/lodepng/)
 
