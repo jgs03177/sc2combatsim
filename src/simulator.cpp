@@ -314,12 +314,12 @@ Simulator::Simulator(int argc, char* argv[], const SimulatorConfig& config) :
 
 void Simulator::set(){
 	coordinator_ = new sc2::Coordinator();
-#ifdef SCREENCAPTURE
+//#ifdef SCREENCAPTURE
 #if !defined(__linux__)
 	sc2::RenderSettings settings(800, 600, 300, 300);
 	coordinator_->SetRender(settings);
 #endif // !defined(__linux__)
-#endif // SCREENCAPTURE
+//#endif // SCREENCAPTURE
 
 	coordinator_->LoadSettings(argc, argv);
 	coordinator_->SetWindowSize(960, 720);

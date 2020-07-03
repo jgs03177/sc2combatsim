@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 3.15)
 #cmake_policy(SET CMP0091 NEW)
 project (SC2CombatSim CXX)
 
-set(SC2CombatSim_VERSION_MAJOR 1)
-set(SC2CombatSim_VERSION_MINOR 0)
+set(SC2CombatSim_VERSION_MAJOR 0)
+set(SC2CombatSim_VERSION_MINOR 1)
 
 set(PATH_MAPS "${PROJECT_SOURCE_DIR}/maps/")
 set(PATH_CONFIG "${PROJECT_SOURCE_DIR}/config/")

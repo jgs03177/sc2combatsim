@@ -2,10 +2,10 @@
 # repo & build directory.
 
 repo_directory="../s2client-api"
-build_directory="../s2client-api/build_linux"
+build_directory="../s2client-api/build"
 
-echo "repository directory is ${repo_directory}"
-echo "build directory is ${build_directory}"
+echo "repository directory is set to ${repo_directory}"
+echo "build directory is set to ${build_directory}"
 
 # install sc2api headers
 sudo mkdir -p /opt/local/include
