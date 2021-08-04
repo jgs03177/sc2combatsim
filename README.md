@@ -35,7 +35,7 @@ mkdir build && cd build
 cmake ..
 ```
 
-Finally, build with Visual Studio and execute the generated `sc2combatsim.exe`.
+Finally, build with Visual Studio and run the generated `sc2combatsim.exe`.
 
 #### Linux
 Starting from the main directory, clone s2client-api fork and build the code. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
@@ -58,7 +58,7 @@ cmake ..
 make
 ```
 
-Finally, execute the generated executable `SC2CombatSim`.
+Finally, run the generated executable `SC2CombatSim`.
 
 ### Settings
 
@@ -111,7 +111,7 @@ You can modify simulation settings by modifying `config/config.json`.
 
 ### Application
 
-+ Predict combat outcomes of two armies and optimizing a unit-combination of an army. [(Link)](https://github.com/jgs03177/pcooa-sc2)
++ Predict combat outcomes of two armies and optimize a unit-combination of an army. [(Link)](https://github.com/jgs03177/pcooa-sc2)
 
 
 ### Papers
