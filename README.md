@@ -1,6 +1,10 @@
 StarCraft II Combat Simulator
 ----------------------------
 
+### Demo
+
+https://user-images.githubusercontent.com/30069011/128225373-eb084511-7d9b-42bb-91aa-637dc28da009.mp4
+
 ### Prerequisite
 + [git](https://git-scm.com/downloads)
 + [cmake](https://cmake.org/download/)
@@ -107,7 +111,7 @@ You can modify simulation settings by modifying `config/config.json`.
 
 ### Application
 
-[Predict combat outcomes of two armies and optimizing a unit-combination of an army](https://github.com/jgs03177/pcooa-sc2)
++ Predict combat outcomes of two armies and optimizing a unit-combination of an army. [(Link)](https://github.com/jgs03177/pcooa-sc2)
 
 
 ### Papers
