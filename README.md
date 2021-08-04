@@ -1,11 +1,10 @@
-StarCraft 2 Combat Simulator
+StarCraft II Combat Simulator
 ----------------------------
 
 ### Prerequisite
 + [git](https://git-scm.com/downloads)
 + [cmake](https://cmake.org/download/)
-+ Install Starcraft binary from Blizzard (Windows)
-+ or [StarCraft binary (Linux)](https://github.com/Blizzard/s2client-proto#downloads)
++ Starcraft II binary (Windows from Blizzard, Linux from [this link](https://github.com/Blizzard/s2client-proto#downloads)).
 
 ### Installation
 
@@ -55,7 +54,7 @@ cmake ..
 make
 ```
 
-Finally, execute the generated excutable `SC2CombatSim`
+Finally, execute the generated executable `SC2CombatSim`.
 
 ### Settings
 
@@ -96,17 +95,39 @@ You can modify simulation settings by modifying `config/config.json`.
 }
 ```
 
-+ `simmode`: One of `PvP`, `PvC`, `CvC`. In `CvC` mode combats are simulated with 2 agents where both agents are controlled by Blizzard's StarCraft II AIs. In `PvP` mode both agents are controlled from the code in `player.cpp` and `player.h`. In `PvC` mode, player1=P and player2=C.
++ `simmode`: One of `PvP`, `PvC`, `CvC`. In `CvC` mode combats are simulated with 2 agents where both agents are controlled by Blizzard's StarCraft II AIs. In `PvP` mode both agents are controlled from the code in `player.cpp` and `player.h`. In `PvC` mode, `player1 = P` and `player2 = C`.
 + `numround`: The number of simulations of new combats.
 + `numrepeat`: The number of repeats of the same combats.
-+ `stepsize`: The number of interval between execution of the code. Greater value makes faster simulations, but less execution of the code.
++ `stepsize`: The number of intervals between the execution of the code. Greater value makes faster simulations, but less execution of the code.
 + `port`: port to use (`port`~`port+2` will be used).
 + `mapname`: Map name or path to execute the simulation.
 + `offset`: The location of the generated squad is defined by `map center coordinate` + `offset`.
 + `limit_ore`, `limit_gas`, `limit_food`: The limitation of resources forming a squad in simulation.
-+ `index`: Defines which units to use in simulation. `1`: terran ground units, `2`: zerg ground units, `3`: protoss ground units. See `combinator.cpp`.
++ `index`: Defines which units to use in simulation. `1`: Terran ground units, `2`: zerg ground units, `3`: Protoss ground units. See `combinator.cpp`.
+
+### Application
+
+[Predict combat outcomes of two armies and optimizing a unit-combination of an army](https://github.com/jgs03177/pcooa-sc2)
+
 
 ### Papers
+
++ [Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning](https://authors.elsevier.com/c/1dUHX3PiGTH-G1) 
+
+```
+@article{Lee2021,
+  doi = {10.1016/j.eswa.2021.115592},
+  url = {https://doi.org/10.1016/j.eswa.2021.115592},
+  year = {2021},
+  month = dec,
+  publisher = {Elsevier {BV}},
+  volume = {185},
+  pages = {115592},
+  author = {Donghyeon Lee and Man-Je Kim and Chang Wook Ahn},
+  title = {Predicting combat outcomes and optimizing armies in {StarCraft} {II} by deep learning},
+  journal = {Expert Systems with Applications}
+}
+```
 
 + [BattleNet: Capturing Advantageous Battlefield in RTS Games (Student Abstract)](https://doi.org/10.1609/aaai.v34i10.7197)
 
@@ -125,8 +146,6 @@ You can modify simulation settings by modifying `config/config.json`.
   journal = {Proceedings of the {AAAI} Conference on Artificial Intelligence}
 }
 ```
-
-+ Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning [Link](https://github.com/jgs03177/pcooa-sc2)
 
 ### Dependencies
 
@@ -154,4 +173,4 @@ This project contains code from:
 
 ### Known Issues
 
-This simulator can run on WSL (Windows Subsystem for Linux), but it crashes within 1 day.
+This simulator can run on WSL (Windows Subsystem for Linux), but the simulator crashes unexpectedly within 1 day.
