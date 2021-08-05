@@ -5,19 +5,19 @@ StarCraft II Combat Simulator
 
 https://user-images.githubusercontent.com/30069011/128225373-eb084511-7d9b-42bb-91aa-637dc28da009.mp4
 
-### Prerequisite
+### Installation
+
+#### Prerequisite
 + [git](https://git-scm.com/downloads)
 + [cmake](https://cmake.org/download/)
-+ Starcraft II binary (Windows from Blizzard, Linux from [this link](https://github.com/Blizzard/s2client-proto#downloads)).
-
-### Installation
++ Starcraft II binary (Windows from Blizzard, Linux from [this link](https://github.com/Blizzard/s2client-proto#downloads))
 
 #### Windows
 
 Starting from the main directory, clone s2client-api fork, and build the code with cmake. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
 
 ```
-git clone https://github.com/jgs03177/s2client-api.git && cd s2client-api
+git clone --recursive https://github.com/jgs03177/s2client-api.git && cd s2client-api
 mkdir build && cd build
 cmake ..
 ```
@@ -41,7 +41,7 @@ Finally, build with Visual Studio and run the generated `sc2combatsim.exe`.
 Starting from the main directory, clone s2client-api fork and build the code. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
 
 ```
-git clone https://github.com/jgs03177/s2client-api.git && cd s2client-api
+git clone --recursive https://github.com/jgs03177/s2client-api.git && cd s2client-api
 mkdir build && cd build
 cmake ..
 make
