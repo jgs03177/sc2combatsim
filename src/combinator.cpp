@@ -90,10 +90,10 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 		"ghost",		// 50
 		"hellion",		// 53
 		"helliontank",	// 484
-		"siegetank",	// 33, sieged 32
-		"cyclone",		// 692 /
-		"thor",			// 52, ap 691
-		"vikingassault",// assault 34, fighter 35
+		"siegetank",	// siegetank 33, siegetanksieged 32
+		"cyclone",		// 692
+		"thor",			// thor 52, thorap 691
+		"vikingassault",// vikingassault 34, vikingfighter 35
 	},
 	// #2 - Zerg, movable, ground-to-ground weapons.
 	{
@@ -121,7 +121,7 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 	},
 	// #4 - Terran, movable, air-to-air/ground units.
 	{
-		"liberator",    // 689, ag 734
+		"liberator",    // liberator 689, liberatorag 734
 		"banshee",
 		"raven",
 		"battlecruiser",
@@ -143,38 +143,44 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 	// #7 - Terran, specially excluded.
 	{
 		/** ground units **/
-		"widowmine",    // long cooldowns
-		// "siegetanksieged", // immovable
-							  // 33, sieged 32
+		"widowmine",          // widowmine: long cooldowns
+
+		// "siegetanksieged", // siegetank: immovable
+							  // siegetank 33, siegetanksieged 32
 
 		/*** air  units ***/
-		"medivac",		// magician, shuttle
+		"medivac",		      // medivac: spellcaster, shuttle
 	},
 	// #8 - Zerg, specially excluded.
 	{
 		/** ground units **/
-		"lurkermpburrowed",   // immovable
-							  // 911, burrowed 912
-							  // mp 502, mpburrowed 503
-		"infestor",           // magician
-							  // 111
-		"swarmhostburrowedmp",// magician
-							  // mp 494, burrowedmp 493
+		"lurkermpburrowed",   // lurker: immovable
+							  // lurkermp 502
+							  // lurkermpburrowed 503
+							  // (unused) lurker 911
+							  // (unused) lurkerburrowed 912
+
+		"infestor",           // infestor: spellcaster
+							  // infestor 111
+
+		"swarmhostburrowedmp",// swarmhost: spellcaster
+							  // swarmhostmp 494
+							  // swarmhostburrowedmp 493
 
 		/*** air  units ***/
-		"overlord",   // sight, shuttle
-		"overseer",   // detector
+		"overlord",	          // overlord: sight, shuttle
+		"overseer",	          // detector
 	},
 	// #9 - Protoss, specially excluded.
 	{
 		/** ground units **/
-		"disruptor",  // magician
+		"disruptor",          // spellcaster
 
 		/*** air  units ***/
-		"oracle",     // magician?
-		"mothership", // cloaker
-		"warpprism",  // shuttle
-		"observer",   // detector
+		"oracle",             // spellcaster?
+		"mothership",         // cloaker
+		"warpprism",          // shuttle
+		"observer",           // detector
 	},
 });
 
@@ -424,7 +430,7 @@ sc2::UnitTypeID Combinator::NameToUnitTypeID(const std::string& name) const {
 			return data.unit_type_id;
 		}
 	}
-	std::cerr << "Fatal Error: unit name " << name << " not found!" << std::endl;
+	std::cerr << "Fatal Error: unit name " << name << " is not found!" << std::endl;
 	exit(-1);
 	return 0;
 }

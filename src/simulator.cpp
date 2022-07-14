@@ -142,18 +142,19 @@ int Simulator::Update() {
 			}
 
 #if !defined(__linux__)
-			cdelay = 0;
-			simflag = indelay;
-#else
-			simflag = oncreate;
+			cdelay = ndelay;
 #endif
+			simflag = indelay;
 			break;
 		}
-		 // delay for waiting death remainder to disappear
+		 // delay for waiting dead body to disappear
 		case indelay: {
-			if (cdelay >= ndelay)
+			if (cdelay) {
+				cdelay--;
+			}
+			else {
 				simflag = oncreate;
-			cdelay++;
+			}
 			break;
 		}
 		// create units for battle
@@ -275,12 +276,13 @@ int Simulator::Update() {
 		}
 		// error
 		default: {
-			std::cout << "State error." << std::endl;
+			std::cerr << "FATAL: simulation state error." << std::endl;
 			exit(1);
 			break;
 		}
 		}
 
+		// Execute debug actions
 		p1.SendDebug();
 		if (p1.Bot() != p2.Bot()) {
 			p2.SendDebug();
@@ -392,4 +394,3 @@ void Simulator::reset() {
 sc2::Coordinator* Simulator::coordinator() {
 	return coordinator_;
 }
-
