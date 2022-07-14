@@ -129,6 +129,7 @@ find_path(SC2Api_Protobuf_INCLUDE_DIR
     NAMES
         "google/protobuf/stubs/common.h"
     PATHS
+        "${PROJECT_SOURCE_DIR}/include"
         "${SC2Api_INCLUDE_DIR}/sc2api"
     NO_DEFAULT_PATH
 )

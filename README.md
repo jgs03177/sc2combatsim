@@ -1,5 +1,5 @@
 StarCraft II Combat Simulator
-----------------------------
+-----------------------------
 
 ### Demo
 
@@ -8,6 +8,7 @@ https://user-images.githubusercontent.com/30069011/128225373-eb084511-7d9b-42bb-
 ### Installation
 
 #### Prerequisite
+
 + [git](https://git-scm.com/downloads)
 + [cmake](https://cmake.org/download/)
 + Starcraft II binary (Windows from Blizzard, Linux from [this link](https://github.com/Blizzard/s2client-proto#downloads))
@@ -16,20 +17,19 @@ https://user-images.githubusercontent.com/30069011/128225373-eb084511-7d9b-42bb-
 
 Starting from the main directory, clone s2client-api fork, and build the code with cmake. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
 
-```
-git clone --recursive https://github.com/jgs03177/s2client-api.git && cd s2client-api
+```cmd
+git clone --recursive https://github.com/jgs03177/cpp-sc2.git && cd cpp-sc2
 mkdir build && cd build
 cmake ..
 ```
 
 Build with Visual Studio both debug mode and release mode to get the compiled libraries. We are going to move the headers and libraries later.
-Go back to the main directory and clone this project (StarCraft 2 Combat Simulator), and move the headers and libraries by executing `s2client-api/synchproject.bat` and `sc2combatsim/move.bat`. This will move from
-`s2client-api/project/include` and `s2client-api/project/lib` to `sc2combatsim/include` and `sc2combatsim/lib`, respectively. Then, build the simulator code with cmake.
+Go back to the main directory and clone this project (StarCraft 2 Combat Simulator), and move the headers and libraries by executing `sc2combatsim/move.bat`. This will copy
+`cpp-sc2/include/*/*.h`(headers) and `cpp-sc2/build/bin/*.lib`(libraries) into `sc2combatsim/include` and `sc2combatsim/lib`, respectively. Then, build the simulator code with cmake.
 
-```
+```cmd
 cd ../..
 git clone https://github.com/jgs03177/sc2combatsim.git && cd sc2combatsim
-../s2client-api/synchproject.bat
 move.bat
 mkdir build && cd build
 cmake ..
@@ -38,18 +38,19 @@ cmake ..
 Finally, build with Visual Studio and run the generated `sc2combatsim.exe`.
 
 #### Linux
+
 Starting from the main directory, clone s2client-api fork and build the code. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
 
-```
-git clone --recursive https://github.com/jgs03177/s2client-api.git && cd s2client-api
+```bash
+git clone --recursive https://github.com/jgs03177/cpp-sc2.git && cd cpp-sc2
 mkdir build && cd build
 cmake ..
 make
 ```
 
-Go back to the main directory and clone this project (StarCraft 2 Combat Simulator), and move the headers and libraries by executing `sc2combatsim/move.sh`. Then, build the simulator code. 
+Go back to the main directory and clone this project (StarCraft 2 Combat Simulator), and move the headers and libraries by executing `sc2combatsim/move.sh`. Then, build the simulator code.
 
-```
+```bash
 cd ../..
 git clone https://github.com/jgs03177/sc2combatsim.git && cd sc2combatsim
 sh move.sh
@@ -64,7 +65,7 @@ Finally, run the generated executable `SC2CombatSim`.
 
 You can modify simulation settings by modifying `config/config.json`.
 
-```
+```json
 {
     "simmode": "PvP",
     "numround": 5000,
@@ -113,12 +114,11 @@ You can modify simulation settings by modifying `config/config.json`.
 
 + Predict combat outcomes of two armies and optimize a unit-combination of an army. [(Link)](https://github.com/jgs03177/pcooa-sc2)
 
-
 ### Papers
 
-+ [Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning](https://authors.elsevier.com/c/1dUHX3PiGTH-G1) 
++ [Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning](https://authors.elsevier.com/c/1dUHX3PiGTH-G1)
 
-```
+```bibtex
 @article{Lee2021,
   doi = {10.1016/j.eswa.2021.115592},
   url = {https://doi.org/10.1016/j.eswa.2021.115592},
@@ -135,7 +135,7 @@ You can modify simulation settings by modifying `config/config.json`.
 
 + [BattleNet: Capturing Advantageous Battlefield in RTS Games (Student Abstract)](https://doi.org/10.1609/aaai.v34i10.7197)
 
-```
+```bibtex
 @article{Lee2020,
   doi = {10.1609/aaai.v34i10.7197},
   url = {https://doi.org/10.1609/aaai.v34i10.7197},

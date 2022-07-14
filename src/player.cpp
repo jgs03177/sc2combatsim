@@ -24,6 +24,33 @@ void Player::setConfig(const PlayerConfig& config) {
 	this->config = config;
 }
 
+///////////////////////////////
+//
+// Piece of code from SC2CLIENT-API
+//
+
+//! Determines if the unit matches the unit type.
+struct IsUnit {
+	IsUnit(sc2::UNIT_TYPEID type) : type_(type) {};
+	sc2::UNIT_TYPEID type_;
+	bool operator()(const sc2::Unit& unit) { return unit.unit_type == type_; };
+};
+
+//! Determines if units matches the unit type.
+struct IsUnits {
+	IsUnits(std::vector<sc2::UNIT_TYPEID> types) : types_(types) {};
+	std::vector<sc2::UNIT_TYPEID> types_;
+	bool operator()(const sc2::Unit& unit) {
+		bool included = false;
+		for (const auto& type : types_) {
+			included = included || (unit.unit_type == type);
+		}
+		return included;
+	};
+};
+////////////////////////////////
+
+
 // get agent
 sc2::Agent* const Player::Bot() const {
 	return agent_;
@@ -51,7 +78,7 @@ void Player::GameInit() {
 size_t Player::CountPlayerUnit(sc2::UnitTypeID unit_type, uint32_t playerID) const {
 	return Bot()->Observation()->GetUnits(
 		[unit_type, playerID](const sc2::Unit& unit) {
-			return unit.owner == playerID && sc2::IsUnit(unit_type)(unit); }
+			return unit.owner == playerID && IsUnit(unit_type)(unit); }
 	).size();
 }
 
