@@ -2,103 +2,67 @@
 
 #include "util.h"
 
-#include "json/json.h"
-
 #include <iostream>
 #include <vector>
 
-void Player::setBot(sc2::Agent* agent) {
-	this->agent_ = agent;
-	default_playerID = true;
-}
-void Player::setBot(sc2::Agent* agent, int32_t playerID) {
-	this->agent_ = agent;
-	this->playerID = playerID;
-	default_playerID = false;
+
+void Player::SetBot(sc2::Agent* agent, playerid_t playerID) {
+	_agent = agent;
+	_playerID = playerID;
 }
 
-void Player::setConfig(const PlayerConfig& config) {
-	this->config = config;
+void Player::SetConfig(const PlayerConfig& config) {
+	_config = config;
 }
-
-///////////////////////////////
-//
-// Piece of code from SC2CLIENT-API
-//
-
-//! Determines if the unit matches the unit type.
-struct IsUnit {
-	IsUnit(sc2::UNIT_TYPEID type) : type_(type) {};
-	sc2::UNIT_TYPEID type_;
-	bool operator()(const sc2::Unit& unit) { return unit.unit_type == type_; };
-};
-
-//! Determines if units matches the unit type.
-struct IsUnits {
-	IsUnits(std::vector<sc2::UNIT_TYPEID> types) : types_(types) {};
-	std::vector<sc2::UNIT_TYPEID> types_;
-	bool operator()(const sc2::Unit& unit) {
-		bool included = false;
-		for (const auto& type : types_) {
-			included = included || (unit.unit_type == type);
-		}
-		return included;
-	};
-};
-////////////////////////////////
-
 
 // get agent
 sc2::Agent* const Player::Bot() const {
-	return agent_;
+	return _agent;
 }
 
 Combinator& Player::combinator() {
-	return combinator_;
+	return _combinator;
 }
 
 const Combinator& Player::combinator() const {
-	return combinator_;
+	return _combinator;
 }
 
 void Player::GameInit() {
 	const sc2::GameInfo game_info = Bot()->Observation()->GetGameInfo();
-	centerpos = (game_info.playable_max + game_info.playable_min) / 2.0f;
-	genpos = offset + centerpos;
-	combinator_.set_unitdata(Bot()->Observation());
+	_centerpos = (game_info.playable_max + game_info.playable_min) / 2.0f;
+	_genpos = _offset + _centerpos;
+	_combinator.set_unitdata(Bot()->Observation());
 
-	if (default_playerID) {
-		playerID = Bot()->Observation()->GetPlayerID();
+	if (_playerID<0) {
+		_playerID = Bot()->Observation()->GetPlayerID();
 	}
 }
 
-size_t Player::CountPlayerUnit(sc2::UnitTypeID unit_type, uint32_t playerID) const {
+size_t Player::CountPlayerUnit(sc2::UnitTypeID unit_type, playerid_t playerID) const {
+	if (playerID < 0) {
+		playerID = _playerID;
+	}
 	return Bot()->Observation()->GetUnits(
 		[unit_type, playerID](const sc2::Unit& unit) {
-			return unit.owner == playerID && IsUnit(unit_type)(unit); }
+			return unit.owner == playerID && Util::IsUnit(unit_type)(unit); }
 	).size();
 }
 
-size_t Player::CountPlayerUnit(uint32_t playerID) const {
-	return Bot()->Observation()->GetUnits(
-		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; }
-	).size();
-}
-
-size_t Player::CountPlayerUnit() const {
-	uint32_t playerID = this->playerID;
+size_t Player::CountPlayerUnit(playerid_t playerID) const {
+	if (playerID < 0) {
+		playerID = _playerID;
+	}
 	return Bot()->Observation()->GetUnits(
 		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; }
 	).size();
 }
 
 std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> >
-Player::GetPlacedUnit() const {
-	return GetPlacedUnit(playerID);
-}
-
-std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> >
-Player::GetPlacedUnit(uint32_t playerID) const {
+Player::GetPlacedUnit(playerid_t playerID) const {
+	if (playerID < 0) {
+		playerID = _playerID;
+	}
 	sc2::Units myunits = Bot()->Observation()->GetUnits(
 		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; });
 	// make a map
@@ -122,7 +86,7 @@ Player::GetPlacedUnit(uint32_t playerID) const {
 	return std::make_tuple(squad_unittypeid, squad_quantity);
 }
 
-void Player::DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, uint32_t playerID) {
+void Player::DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, playerid_t playerID) {
 	sc2::DebugInterface* debug = Bot()->Debug();
 	debug->DebugCreateUnit(unit, pos, playerID, numbers);
 	//debug->SendDebug();
@@ -132,7 +96,7 @@ void Player::DeployUnit(
 	const std::vector<sc2::UnitTypeID>& squad_unittypeid,
 	const std::vector<int>& squad_quantity,
 	sc2::Vector2D pos,
-	uint32_t playerID,
+	playerid_t playerID,
 	bool shuffle
 ) {
 	sc2::DebugInterface* debug = Bot()->Debug();
@@ -143,7 +107,7 @@ void Player::DeployUnit(
 		random_index[i] = i;
 	}
 	if (shuffle) {
-		random.shuffle(random_index.begin(), random_index.end());
+		_random.shuffle(random_index.begin(), random_index.end());
 	}
 	for (int i = 0; i < length; i++) {
 		int index = random_index[i];
@@ -158,28 +122,18 @@ void Player::DeployUnit(
 void Player::DeployUnit(bool shuffle) {
 	std::vector<sc2::UnitTypeID> squad_unittypeid;
 	std::vector<int> squad_quantity;
-	std::tie(squad_unittypeid, squad_quantity) = combinator_.get_squad();
-	DeployUnit(squad_unittypeid, squad_quantity, centerpos + config.offset, playerID, shuffle);
+	std::tie(squad_unittypeid, squad_quantity) = _combinator.get_squad();
+	DeployUnit(squad_unittypeid, squad_quantity, _centerpos + _config.offset, _playerID, shuffle);
 }
 
-void Player::KillPlayerUnit(uint32_t playerID) {
+void Player::KillPlayerUnit(playerid_t playerID) {
+	if (playerID < 0) {
+		playerID = _playerID;
+	}
 	sc2::DebugInterface* debug = Bot()->Debug();
 	const sc2::ObservationInterface* observation = Bot()->Observation();
 	sc2::Units units = observation->GetUnits(
 		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; });
-	for (const auto& unit : units) {
-		debug->DebugKillUnit(unit);
-	}
-	//debug->SendDebug();
-}
-
-void Player::KillPlayerUnit() {
-	uint32_t playerID = this->playerID;
-	sc2::DebugInterface* debug = Bot()->Debug();
-	const sc2::ObservationInterface* observation = Bot()->Observation();
-	sc2::Units units = observation->GetUnits(
-		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; }
-	);
 	for (const auto& unit : units) {
 		debug->DebugKillUnit(unit);
 	}
@@ -216,11 +170,11 @@ void Player::LeaveGame() {
 
 void Player::MoveCamera() {
 	const sc2::ObservationInterface* observation = Bot()->Observation();
-	uint32_t playerID = this->playerID;
+	playerid_t playerID = _playerID;
 
 	sc2::Units myunits = observation->GetUnits(
 		[playerID](const sc2::Unit& unit) {return unit.owner == playerID; });
-	sc2::Point2D mycenter = centerpos + config.offset;
+	sc2::Point2D mycenter = _centerpos + _config.offset;
 	if (myunits.size()) {
 		for (const auto& unit : myunits) {
 			mycenter += sc2::Point2D(unit->pos);

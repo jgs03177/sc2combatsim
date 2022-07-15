@@ -28,14 +28,14 @@ void Simulator::squadgen(){
     int ngen = 20000;
 
 	std::cout << "launch!" << std::endl;
-	coordinator_->LaunchStarcraft();
+	Coordinator()->LaunchStarcraft();
 
 	std::cout << "start!" << std::endl;
-	coordinator_->StartGame(config.mapname);
+    Coordinator()->StartGame(config.mapname);
 
 	std::cout << "Game Begins!" << std::endl;
 
-    coordinator_->Update();
+    Coordinator()->Update();
     
     p1.GameInit();
     
