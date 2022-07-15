@@ -3,12 +3,8 @@
 #include "json/json.h"
 
 #include <iostream>
-#include <random>
-#include <cmath>
 #include <cctype>
-
-std::random_device device;
-std::mt19937_64 generator(device());
+#include <cmath>
 
 /* //////////
 Terran - ground
@@ -184,29 +180,6 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 	},
 });
 
-void dirichlet1(int k, std::vector<float>& ratios) {
-	ratios.clear();
-	ratios.reserve(k);
-	std::gamma_distribution<float> distribution(1.0, 1.0);
-	float sum = 0;
-	for (int i = 0; i < k; i++) {
-		float sample = distribution(generator);
-		sum += sample;
-		ratios.push_back(sample);
-	}
-	for (float& ratio : ratios) {
-		ratio /= sum;
-	}
-}
-
-// Beta(1, k)
-// see (https://en.wikipedia.org/wiki/Dirichlet_distribution#Marginal_beta_distributions)
-float beta1k(int k) {
-	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
-	float u = distribution(generator);
-	return 1 - pow(1 - u, 1.0f / k);
-}
-
 void Combinator::reset(){
 	set_resources(config.limit_ore, config.limit_gas, config.limit_food);
 	if (config.index) {
@@ -295,15 +268,14 @@ bool Combinator::pick_and_rearrange_candidates(float probability){
 		std::cerr << "Fatal error : no candidates!" << std::endl;
 		exit(1);
 	}
-	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
 	// pick each element with probability
 	for (const auto& id : this->candidates) {
-		if (distribution(generator) <= probability) {
+		if (random.random() <= probability) {
 			squad_unittypeid.push_back(id);
 		}
 	}
 	// shuffle
-	std::shuffle(squad_unittypeid.begin(), squad_unittypeid.end(), device);
+	random.shuffle(squad_unittypeid.begin(), squad_unittypeid.end());
 	return true;
 }
 
@@ -315,10 +287,10 @@ bool Combinator::make_squad(){
 	squad_quantity.clear();
 
 	std::vector<float> ratios;
-	dirichlet1(variables, ratios);
+	ratios = random.dirichlet1(variables);
 	for (const auto& unittypeid : candidates) {
 		float num_affordable = get_unit_affordable(unittypeid);
-		float ratio = (variables == 1) ? 1.0f : beta1k(variables - 1);
+		float ratio = (variables == 1) ? 1.0f : random.beta1k(variables - 1);
 		int32_t num_bought = static_cast<int32_t>(std::floor(num_affordable * ratio));
 		subtract_unit_resource(unittypeid, num_bought);
 		variables--;
@@ -345,7 +317,7 @@ bool Combinator::make_squad_simultaneous() {
 	const int32_t lmineral = mineral;
 	const int32_t lgas = gas;
 	const int32_t lfood = food;
-	dirichlet1(variables, ratios);
+	ratios = random.dirichlet1(variables);
 	for (const auto& unittypeid : candidates) {
 		float num_affordable = get_unit_affordable(unittypeid, lmineral, lgas, lfood);
 		float ratio = ratios.back();

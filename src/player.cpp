@@ -6,9 +6,6 @@
 
 #include <iostream>
 #include <vector>
-#include <random>
-
-std::random_device device2;
 
 void Player::setBot(sc2::Agent* agent) {
 	this->agent_ = agent;
@@ -146,7 +143,7 @@ void Player::DeployUnit(
 		random_index[i] = i;
 	}
 	if (shuffle) {
-		std::shuffle(random_index.begin(), random_index.end(), device2);
+		random.shuffle(random_index.begin(), random_index.end());
 	}
 	for (int i = 0; i < length; i++) {
 		int index = random_index[i];

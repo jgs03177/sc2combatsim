@@ -2,6 +2,7 @@
 
 #include "combinator.h"
 #include "configurator.h"
+#include "randomsample.h"
 
 #include "json/json-forwards.h"
 
@@ -16,6 +17,7 @@ private:
 	sc2::Point2D centerpos;
 	PlayerConfig config;
 	Combinator combinator_;
+	RandomSample random;
 
 public:
 

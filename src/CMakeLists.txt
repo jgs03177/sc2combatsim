@@ -5,6 +5,7 @@ add_executable(SC2CombatSim
    bots.cpp         bots.h
    simulator.cpp    simulator.h
    combinator.cpp   combinator.h
+                    randomsample.h
    recorder.cpp     recorder.h
    configurator.cpp configurator.h
    util.cpp         util.h
@@ -17,6 +18,7 @@ add_executable(SC2SquadGen
    bots.cpp         bots.h
    simulator.cpp    simulator.h
    combinator.cpp   combinator.h
+                    randomsample.h
    recorder.cpp     recorder.h
    configurator.cpp configurator.h
    util.cpp         util.h
