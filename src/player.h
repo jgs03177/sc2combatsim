@@ -39,13 +39,13 @@ public:
 	size_t CountPlayerUnit(playerid_t playerID=-1) const;
 
 	// Get list of units (seen) owned by player
-	std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> > GetPlacedUnit(playerid_t playerID=-1) const;
+	std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> > GetSurvivedUnits(playerid_t playerID=-1) const;
 
 	// Put unit owned by player (need to send debug)
-	void DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, playerid_t playerID);
+	void PlaceUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, playerid_t playerID);
 
 	// Put list of units owned by player (need to send debug)
-	void DeployUnit(
+	std::vector<int> PlaceUnits(
 		const std::vector<sc2::UnitTypeID>& squad_unittypeid,
 		const std::vector<int>& squad_quantity, 
 		sc2::Vector2D pos,
@@ -54,7 +54,10 @@ public:
 	);
 
 	// Put list of units as predefined way.
-	void DeployUnit(bool shuffle=true);
+	std::vector<int> PlaceUnits(
+		const std::vector<sc2::UnitTypeID>& squad_unittypeid,
+		const std::vector<int>& squad_quantity, 
+		bool shuffle=true);
 
 	// Kill all (seen) units owned by player (need to send debug)
 	void KillPlayerUnit(playerid_t playerID=-1);

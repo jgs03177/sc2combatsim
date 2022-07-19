@@ -12,7 +12,7 @@ namespace Util {
 	// Get filename timestring.
 	std::string gettimestr();
 
-	std::tuple<std::vector<sc2::UnitTypeID>, std::vector<int>, std::vector<sc2::UnitTypeID>, std::vector<int> > read(const std::string& path);
+	std::tuple<std::vector<sc2::UnitTypeID>, std::vector<int>, std::vector<sc2::UnitTypeID>, std::vector<int> > ReadPresetSquad(const std::string& path);
 
 	// Code from SC2CLIENT-API
 	//! Determines if the unit matches the unit type.

@@ -91,6 +91,9 @@ int Simulator::Update() {
 	int32_t cbattle = 0;
 	int32_t cdelay = 0;
 
+	std::vector<sc2::UnitTypeID> squad_unittypeid1, squad_unittypeid2;
+	std::vector<int> squad_quantity1, squad_quantity2;
+
 	while (_coordinator->Update()) {
 		std::cout << std::hex << simflag << std::dec << std::flush;
 #if !defined(__linux__)
@@ -113,28 +116,24 @@ int Simulator::Update() {
 		// fetch battles randomly
 		case onchange: {
 			if (neednewsquad) {
+				auto& p1comb = p1.combinator();
+				auto& p2comb = p2.combinator();
 				if (config.squadpath.compare("") != 0){
-					std::vector<sc2::UnitTypeID> squad_unittypeid1, squad_unittypeid2;
-					std::vector<int> squad_quantity1, squad_quantity2;
-
 					std::string path = config.squadpath + "/b_" + std::to_string(config.squadoffset + cround - 1) + ".txt";
-					std::tie(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2) = Util::read(path);
-					p1.combinator().clear_unitlist();
-					p1.combinator().reset();
-					p1.combinator().load_predefined_squad(squad_unittypeid1, squad_quantity1);
-					p2.combinator().clear_unitlist();
-					p2.combinator().reset();
-					p2.combinator().load_predefined_squad(squad_unittypeid2, squad_quantity2);
+					std::tie(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2) = Util::ReadPresetSquad(path);
+					p1comb.load_predefined_squad(squad_unittypeid1, squad_quantity1);
+					p2comb.load_predefined_squad(squad_unittypeid2, squad_quantity2);
 				}
 				else{
-					p1.combinator().clear_unitlist();
-					p1.combinator().reset();
-					p1.combinator().pick_and_rearrange_candidates();
-					p1.combinator().make_squad();
-					p2.combinator().clear_unitlist();
-					p2.combinator().reset();
-					p2.combinator().pick_and_rearrange_candidates();
-					p2.combinator().make_squad();
+					p1comb.clear_unitlist();
+					p1comb.reset();
+					p1comb.pick_and_rearrange_candidates();
+					p1comb.make_squad();
+					
+					p2comb.clear_unitlist();
+					p2comb.reset();
+					p2comb.pick_and_rearrange_candidates();
+					p2comb.make_squad();
 				}
 				recorder.record_combination(p1, p2);
 				neednewsquad = false;
@@ -159,8 +158,12 @@ int Simulator::Update() {
 		}
 		// create units for battle
 		case oncreate: {
-			p1.DeployUnit();
-			p2.DeployUnit();
+			auto& p1comb = p1.combinator();
+			auto& p2comb = p2.combinator();
+			std::tie(squad_unittypeid1, squad_quantity1) = p1comb.get_squad();
+			std::tie(squad_unittypeid2, squad_quantity2) = p2comb.get_squad();
+			p1.PlaceUnits(squad_unittypeid1, squad_quantity1);
+			p2.PlaceUnits(squad_unittypeid2, squad_quantity2);
 
 			simflag = increate;
 			break;

@@ -51,7 +51,7 @@ namespace Util {
 	}
 
 	std::tuple<std::vector<sc2::UnitTypeID>, std::vector<int>, std::vector<sc2::UnitTypeID>, std::vector<int> >
-		read(const std::string& path) {
+		ReadPresetSquad(const std::string& path) {
 		std::ifstream fin;
 
 		std::vector<sc2::UnitTypeID> squad_unittypeid1;

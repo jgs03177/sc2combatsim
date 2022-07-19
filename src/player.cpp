@@ -59,7 +59,7 @@ size_t Player::CountPlayerUnit(playerid_t playerID) const {
 }
 
 std::tuple< std::vector<sc2::UnitTypeID>, std::vector<int> >
-Player::GetPlacedUnit(playerid_t playerID) const {
+Player::GetSurvivedUnits(playerid_t playerID) const {
 	if (playerID < 0) {
 		playerID = _playerID;
 	}
@@ -86,13 +86,13 @@ Player::GetPlacedUnit(playerid_t playerID) const {
 	return std::make_tuple(squad_unittypeid, squad_quantity);
 }
 
-void Player::DeployUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, playerid_t playerID) {
+void Player::PlaceUnit(sc2::UnitTypeID unit, uint32_t numbers, sc2::Vector2D pos, playerid_t playerID) {
 	sc2::DebugInterface* debug = Bot()->Debug();
 	debug->DebugCreateUnit(unit, pos, playerID, numbers);
 	//debug->SendDebug();
 }
 
-void Player::DeployUnit(
+std::vector<int> Player::PlaceUnits(
 	const std::vector<sc2::UnitTypeID>& squad_unittypeid,
 	const std::vector<int>& squad_quantity,
 	sc2::Vector2D pos,
@@ -117,13 +117,14 @@ void Player::DeployUnit(
 		debug->DebugCreateUnit(unittypeID, pos, playerID, quantity);
 	}
 	//debug->SendDebug();
+	return random_index;
 }
 
-void Player::DeployUnit(bool shuffle) {
-	std::vector<sc2::UnitTypeID> squad_unittypeid;
-	std::vector<int> squad_quantity;
-	std::tie(squad_unittypeid, squad_quantity) = _combinator.get_squad();
-	DeployUnit(squad_unittypeid, squad_quantity, _centerpos + _config.offset, _playerID, shuffle);
+std::vector<int> Player::PlaceUnits(
+	const std::vector<sc2::UnitTypeID>& squad_unittypeid,
+	const std::vector<int>& squad_quantity,
+	bool shuffle) {
+	return PlaceUnits(squad_unittypeid, squad_quantity, _centerpos + _config.offset, _playerID, shuffle);
 }
 
 void Player::KillPlayerUnit(playerid_t playerID) {
