@@ -3,12 +3,8 @@
 #include "json/json.h"
 
 #include <iostream>
-#include <random>
-#include <cmath>
 #include <cctype>
-
-std::random_device device;
-std::mt19937_64 generator(device());
+#include <cmath>
 
 /* //////////
 Terran - ground
@@ -90,10 +86,10 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 		"ghost",		// 50
 		"hellion",		// 53
 		"helliontank",	// 484
-		"siegetank",	// 33, sieged 32
-		"cyclone",		// 692 /
-		"thor",			// 52, ap 691
-		"vikingassault",// assault 34, fighter 35
+		"siegetank",	// siegetank 33, siegetanksieged 32
+		"cyclone",		// 692
+		"thor",			// thor 52, thorap 691
+		"vikingassault",// vikingassault 34, vikingfighter 35
 	},
 	// #2 - Zerg, movable, ground-to-ground weapons.
 	{
@@ -121,7 +117,7 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 	},
 	// #4 - Terran, movable, air-to-air/ground units.
 	{
-		"liberator",    // 689, ag 734
+		"liberator",    // liberator 689, liberatorag 734
 		"banshee",
 		"raven",
 		"battlecruiser",
@@ -143,63 +139,46 @@ const static std::vector<std::vector<std::string>> predefined_cand({
 	// #7 - Terran, specially excluded.
 	{
 		/** ground units **/
-		"widowmine",    // long cooldowns
-		// "siegetanksieged", // immovable
-							  // 33, sieged 32
+		"widowmine",          // widowmine: long cooldowns
+
+		// "siegetanksieged", // siegetank: immovable
+							  // siegetank 33, siegetanksieged 32
 
 		/*** air  units ***/
-		"medivac",		// magician, shuttle
+		"medivac",		      // medivac: spellcaster, shuttle
 	},
 	// #8 - Zerg, specially excluded.
 	{
 		/** ground units **/
-		"lurkermpburrowed",   // immovable
-							  // 911, burrowed 912
-							  // mp 502, mpburrowed 503
-		"infestor",           // magician
-							  // 111
-		"swarmhostburrowedmp",// magician
-							  // mp 494, burrowedmp 493
+		"lurkermpburrowed",   // lurker: immovable
+							  // lurkermp 502
+							  // lurkermpburrowed 503
+							  // (unused) lurker 911
+							  // (unused) lurkerburrowed 912
+
+		"infestor",           // infestor: spellcaster
+							  // infestor 111
+
+		"swarmhostburrowedmp",// swarmhost: spellcaster
+							  // swarmhostmp 494
+							  // swarmhostburrowedmp 493
 
 		/*** air  units ***/
-		"overlord",   // sight, shuttle
-		"overseer",   // detector
+		"overlord",	          // overlord: sight, shuttle
+		"overseer",	          // detector
 	},
 	// #9 - Protoss, specially excluded.
 	{
 		/** ground units **/
-		"disruptor",  // magician
+		"disruptor",          // spellcaster
 
 		/*** air  units ***/
-		"oracle",     // magician?
-		"mothership", // cloaker
-		"warpprism",  // shuttle
-		"observer",   // detector
+		"oracle",             // spellcaster?
+		"mothership",         // cloaker
+		"warpprism",          // shuttle
+		"observer",           // detector
 	},
 });
-
-void dirichlet1(int k, std::vector<float>& ratios) {
-	ratios.clear();
-	ratios.reserve(k);
-	std::gamma_distribution<float> distribution(1.0, 1.0);
-	float sum = 0;
-	for (int i = 0; i < k; i++) {
-		float sample = distribution(generator);
-		sum += sample;
-		ratios.push_back(sample);
-	}
-	for (float& ratio : ratios) {
-		ratio /= sum;
-	}
-}
-
-// Beta(1, k)
-// see (https://en.wikipedia.org/wiki/Dirichlet_distribution#Marginal_beta_distributions)
-float beta1k(int k) {
-	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
-	float u = distribution(generator);
-	return 1 - pow(1 - u, 1.0f / k);
-}
 
 void Combinator::reset(){
 	set_resources(config.limit_ore, config.limit_gas, config.limit_food);
@@ -289,15 +268,14 @@ bool Combinator::pick_and_rearrange_candidates(float probability){
 		std::cerr << "Fatal error : no candidates!" << std::endl;
 		exit(1);
 	}
-	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
 	// pick each element with probability
 	for (const auto& id : this->candidates) {
-		if (distribution(generator) <= probability) {
+		if (random.random() <= probability) {
 			squad_unittypeid.push_back(id);
 		}
 	}
 	// shuffle
-	std::shuffle(squad_unittypeid.begin(), squad_unittypeid.end(), device);
+	random.shuffle(squad_unittypeid.begin(), squad_unittypeid.end());
 	return true;
 }
 
@@ -309,10 +287,10 @@ bool Combinator::make_squad(){
 	squad_quantity.clear();
 
 	std::vector<float> ratios;
-	dirichlet1(variables, ratios);
+	ratios = random.dirichlet1(variables);
 	for (const auto& unittypeid : candidates) {
 		float num_affordable = get_unit_affordable(unittypeid);
-		float ratio = (variables == 1) ? 1.0f : beta1k(variables - 1);
+		float ratio = (variables == 1) ? 1.0f : random.beta1k(variables - 1);
 		int32_t num_bought = static_cast<int32_t>(std::floor(num_affordable * ratio));
 		subtract_unit_resource(unittypeid, num_bought);
 		variables--;
@@ -339,7 +317,7 @@ bool Combinator::make_squad_simultaneous() {
 	const int32_t lmineral = mineral;
 	const int32_t lgas = gas;
 	const int32_t lfood = food;
-	dirichlet1(variables, ratios);
+	ratios = random.dirichlet1(variables);
 	for (const auto& unittypeid : candidates) {
 		float num_affordable = get_unit_affordable(unittypeid, lmineral, lgas, lfood);
 		float ratio = ratios.back();
@@ -424,7 +402,7 @@ sc2::UnitTypeID Combinator::NameToUnitTypeID(const std::string& name) const {
 			return data.unit_type_id;
 		}
 	}
-	std::cerr << "Fatal Error: unit name " << name << " not found!" << std::endl;
+	std::cerr << "Fatal Error: unit name " << name << " is not found!" << std::endl;
 	exit(-1);
 	return 0;
 }

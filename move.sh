@@ -1,15 +1,16 @@
 # move.sh
 # repo & build directory.
 
-repo_directory="../s2client-api"
-build_directory="../s2client-api/build"
+repo_directory="../cpp-sc2"
+build_directory="../cpp-sc2/build"
 
-echo "repository directory is set to ${repo_directory}"
-echo "build directory is set to ${build_directory}"
+echo "cpp-sc2's directory is set to ${repo_directory}"
+echo "cpp-sc2's build directory is set to ${build_directory}"
 
 # install sc2api headers
 sudo mkdir -p /opt/local/include
 sudo cp -R ${repo_directory}/include/sc2api /opt/local/include
+sudo cp -R ${repo_directory}/include/sc2lib /opt/local/include
 sudo cp -R ${repo_directory}/include/sc2renderer /opt/local/include
 sudo cp -R ${repo_directory}/include/sc2utils /opt/local/include
 sudo cp -R ${build_directory}/generated/s2clientprotocol /opt/local/include

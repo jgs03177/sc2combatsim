@@ -28,8 +28,8 @@ Json::Value dump_squad(
 	assert(length == squad_quantity.size());
 	Json::Value squad;
 	for (int i = 0; i < length; i++) {
-		squad[i]["UnitTypeID"] = static_cast<int>(squad_unittypeid[i]);
-		squad[i]["Quantity"] = static_cast<int>(squad_quantity[i]);
+		squad[i]["UID"] = static_cast<int>(squad_unittypeid[i]);   // UnitTypeID
+		squad[i]["QTY"] = static_cast<int>(squad_quantity[i]);     // Quantity
 	}
 	return squad;
 }
@@ -42,11 +42,11 @@ void Recorder::record_combination(const Player& player1, const Player& player2) 
 	std::vector<sc2::UnitTypeID> squad_unittypeid;
 	std::vector<int> squad_quantity;
 	// initial squad combination of players.
-	Json::Value& o_comb_p1 = o_combination["squad_p1"];
-	Json::Value& o_comb_p2 = o_combination["squad_p2"];
+	Json::Value& o_comb_p1 = o_combination["SP1"];  // Squad_p1
+	Json::Value& o_comb_p2 = o_combination["SP2"];  // Squad_p2
 	// resource left after generating squad of players.
-	Json::Value& o_rscleft_p1 = o_combination["remaining_resource_p1"];
-	Json::Value& o_rscleft_p2 = o_combination["remaining_resource_p2"];
+	Json::Value& o_rscleft_p1 = o_combination["RP1"];  // Remaining_resource_p1
+	Json::Value& o_rscleft_p2 = o_combination["RP2"];  // Remaining_resource_p1
 	int mineral;
 	int gas;
 	float food;
@@ -65,8 +65,6 @@ void Recorder::record_combination(const Player& player1, const Player& player2) 
 	// Record squads of players
 	std::tie(squad_unittypeid, squad_quantity) = player1.combinator().get_squad();
 	o_comb_p1 = dump_squad(squad_unittypeid, squad_quantity);
-	squad_unittypeid.clear();
-	squad_quantity.clear();
 	std::tie(squad_unittypeid, squad_quantity) = player2.combinator().get_squad();
 	o_comb_p2 = dump_squad(squad_unittypeid, squad_quantity);
 }
@@ -77,8 +75,8 @@ void Recorder::record_result(const Player& player1, const Player& player2,
 	std::vector<int> squad_quantity;
 	Json::Value o_item;
 	// remaining squad combination of players
-	Json::Value& o_remain_p1 = o_item["squad_p1"];
-	Json::Value& o_remain_p2 = o_item["squad_p2"];
+	Json::Value& o_remain_p1 = o_item["SP1"];  // Squad_p1
+	Json::Value& o_remain_p2 = o_item["SP2"];  // Squad_p2
 	// combat result. timeout / p1_win / p2_win / draw
 	Json::Value& o_result = o_item["result"];
 	// frame count.
@@ -87,11 +85,9 @@ void Recorder::record_result(const Player& player1, const Player& player2,
 	o_frame = cframe;
 
 	// Record squads of players
-	std::tie(squad_unittypeid, squad_quantity) = player1.GetPlacedUnit();
+	std::tie(squad_unittypeid, squad_quantity) = player1.GetSurvivedUnits();
 	o_remain_p1 = dump_squad(squad_unittypeid, squad_quantity);
-	squad_unittypeid.clear();
-	squad_quantity.clear();
-	std::tie(squad_unittypeid, squad_quantity) = player2.GetPlacedUnit();
+	std::tie(squad_unittypeid, squad_quantity) = player2.GetSurvivedUnits();
 	o_remain_p2 = dump_squad(squad_unittypeid, squad_quantity);
 
 	o_items.append(o_item);

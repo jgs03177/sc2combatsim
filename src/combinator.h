@@ -1,6 +1,7 @@
 #pragma once
 
 #include "configurator.h"
+#include "randomsample.h"
 
 #include <sc2api/sc2_api.h>
 
@@ -49,6 +50,7 @@ public:
 	);
 
 private:
+	RandomSample random;
     bool use_config = false;
 	CombinatorConfig config;
 	sc2::UnitTypes unitdata;

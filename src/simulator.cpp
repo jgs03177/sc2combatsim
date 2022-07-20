@@ -17,11 +17,11 @@ int Simulator::Begin() {
 	while (nround >= cround) { // While simulation is not finished. cround |-> Z_[1, nround] 
 
 		std::cout << "launch!" << std::endl;
-		coordinator_->LaunchStarcraft();
+		_coordinator->LaunchStarcraft();
 
 		std::cout << "start!" << std::endl;
 		// maximum 2 player, visions are shared.
-		coordinator_->StartGame(config.mapname);
+		_coordinator->StartGame(config.mapname);
 
 		std::cout << "Game Begins!" << std::endl;
 		Update();	// while (simulator.update()){}
@@ -55,7 +55,7 @@ int Simulator::Begin() {
 		// if the game is not properly terminated, do these.
 		if (!properexit) {
 			std::cout << "Something's wrong! Trying to reset!" << std::endl;
-			coordinator_->LeaveGame();
+			_coordinator->LeaveGame();
 			sc2::SleepFor(1000);
 
 			reset();
@@ -91,7 +91,10 @@ int Simulator::Update() {
 	int32_t cbattle = 0;
 	int32_t cdelay = 0;
 
-	while (coordinator_->Update()) {
+	std::vector<sc2::UnitTypeID> squad_unittypeid1, squad_unittypeid2;
+	std::vector<int> squad_quantity1, squad_quantity2;
+
+	while (_coordinator->Update()) {
 		std::cout << std::hex << simflag << std::dec << std::flush;
 #if !defined(__linux__)
 		sc2::SleepFor(1);	// to reduce load to cpu and prevent disconnection.
@@ -113,28 +116,24 @@ int Simulator::Update() {
 		// fetch battles randomly
 		case onchange: {
 			if (neednewsquad) {
+				auto& p1comb = p1.combinator();
+				auto& p2comb = p2.combinator();
 				if (config.squadpath.compare("") != 0){
-					std::vector<sc2::UnitTypeID> squad_unittypeid1, squad_unittypeid2;
-					std::vector<int> squad_quantity1, squad_quantity2;
-
 					std::string path = config.squadpath + "/b_" + std::to_string(config.squadoffset + cround - 1) + ".txt";
-					std::tie(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2) = Util::read(path);
-					p1.combinator().clear_unitlist();
-					p1.combinator().reset();
-					p1.combinator().load_predefined_squad(squad_unittypeid1, squad_quantity1);
-					p2.combinator().clear_unitlist();
-					p2.combinator().reset();
-					p2.combinator().load_predefined_squad(squad_unittypeid2, squad_quantity2);
+					std::tie(squad_unittypeid1, squad_quantity1, squad_unittypeid2, squad_quantity2) = Util::ReadPresetSquad(path);
+					p1comb.load_predefined_squad(squad_unittypeid1, squad_quantity1);
+					p2comb.load_predefined_squad(squad_unittypeid2, squad_quantity2);
 				}
 				else{
-					p1.combinator().clear_unitlist();
-					p1.combinator().reset();
-					p1.combinator().pick_and_rearrange_candidates();
-					p1.combinator().make_squad();
-					p2.combinator().clear_unitlist();
-					p2.combinator().reset();
-					p2.combinator().pick_and_rearrange_candidates();
-					p2.combinator().make_squad();
+					p1comb.clear_unitlist();
+					p1comb.reset();
+					p1comb.pick_and_rearrange_candidates();
+					p1comb.make_squad();
+					
+					p2comb.clear_unitlist();
+					p2comb.reset();
+					p2comb.pick_and_rearrange_candidates();
+					p2comb.make_squad();
 				}
 				recorder.record_combination(p1, p2);
 				neednewsquad = false;
@@ -142,24 +141,29 @@ int Simulator::Update() {
 			}
 
 #if !defined(__linux__)
-			cdelay = 0;
-			simflag = indelay;
-#else
-			simflag = oncreate;
+			cdelay = ndelay;
 #endif
+			simflag = indelay;
 			break;
 		}
-		 // delay for waiting death remainder to disappear
+		 // delay for waiting dead body to disappear
 		case indelay: {
-			if (cdelay >= ndelay)
+			if (cdelay) {
+				cdelay--;
+			}
+			else {
 				simflag = oncreate;
-			cdelay++;
+			}
 			break;
 		}
 		// create units for battle
 		case oncreate: {
-			p1.DeployUnit();
-			p2.DeployUnit();
+			auto& p1comb = p1.combinator();
+			auto& p2comb = p2.combinator();
+			std::tie(squad_unittypeid1, squad_quantity1) = p1comb.get_squad();
+			std::tie(squad_unittypeid2, squad_quantity2) = p2comb.get_squad();
+			p1.PlaceUnits(squad_unittypeid1, squad_quantity1);
+			p2.PlaceUnits(squad_unittypeid2, squad_quantity2);
 
 			simflag = increate;
 			break;
@@ -263,7 +267,7 @@ int Simulator::Update() {
 		}
 		// simulation end
 		case onfinish: {
-			coordinator_->LeaveGame();
+			_coordinator->LeaveGame();
 
 			cdelay = 0;
 			simflag = infinish;
@@ -275,12 +279,13 @@ int Simulator::Update() {
 		}
 		// error
 		default: {
-			std::cout << "State error." << std::endl;
+			std::cerr << "FATAL: simulation state error." << std::endl;
 			exit(1);
 			break;
 		}
 		}
 
+		// Execute debug actions
 		p1.SendDebug();
 		if (p1.Bot() != p2.Bot()) {
 			p2.SendDebug();
@@ -293,7 +298,7 @@ int Simulator::Update() {
 }
 
 Simulator::~Simulator() {
-	delete coordinator_;
+	delete _coordinator;
 }
 
 Simulator::Simulator(int argc, char* argv[], const SimulatorConfig& config) :
@@ -308,44 +313,44 @@ Simulator::Simulator(int argc, char* argv[], const SimulatorConfig& config) :
 	stepsize(config.stepsize),
 	a1(nullptr),
 	a2(nullptr),
-	coordinator_(nullptr)
+	_coordinator(nullptr)
 {
 }
 
 void Simulator::set(){
-	coordinator_ = new sc2::Coordinator();
+	_coordinator = new sc2::Coordinator();
 //#ifdef SCREENCAPTURE
 #if !defined(__linux__)
 	sc2::RenderSettings settings(800, 600, 300, 300);
-	coordinator_->SetRender(settings);
+	_coordinator->SetRender(settings);
 #endif // !defined(__linux__)
 //#endif // SCREENCAPTURE
 
-	coordinator_->LoadSettings(argc, argv);
-	coordinator_->SetWindowSize(960, 720);
-	coordinator_->SetRealtime(false);
-	coordinator_->SetMultithreaded(true);
-	coordinator_->SetStepSize(stepsize);
+	_coordinator->LoadSettings(argc, argv);
+	_coordinator->SetWindowSize(960, 720);
+	_coordinator->SetRealtime(false);
+	_coordinator->SetMultithreaded(true);
+	_coordinator->SetStepSize(stepsize);
 
-	p1.setConfig(config.player1);
-	p2.setConfig(config.player2);
+	p1.SetConfig(config.player1);
+	p2.SetConfig(config.player2);
 	p1.combinator().set_config(config.combin1);
 	p2.combinator().set_config(config.combin2);
 
 	if (config.simmode == SimulatorConfig::SimMode::CvC) {
 		a1 = new Camerabot("CameraBot");
-		p1.setBot(a1, 3);
-		p2.setBot(a1, 4);
-		coordinator_->SetParticipants({
+		p1.SetBot(a1, 3);
+		p2.SetBot(a1, 4);
+		_coordinator->SetParticipants({
 			CreateParticipant(config.player1.race, a1)
 		});
 	}
 	else if (config.simmode == SimulatorConfig::SimMode::PvC) {
 		a1 = new Simbot("PlayerBot");
 		a2 = new Camerabot("CameraBot");
-		p1.setBot(a1, 1);
-		p2.setBot(a2, 5);
-		coordinator_->SetParticipants({
+		p1.SetBot(a1, 1);
+		p2.SetBot(a2, 5);
+		_coordinator->SetParticipants({
 			CreateParticipant(config.player1.race, a1),
 			CreateParticipant(config.player2.race, a2),
 		});
@@ -353,29 +358,29 @@ void Simulator::set(){
 	else {  // config.simmode == SimulatorConfig::SimMode::PvP
 		a1 = new Simbot("Player1Bot");
 		a2 = new Simbot("Player2Bot");
-		p1.setBot(a1, 1);
-		p2.setBot(a2, 2);
-		coordinator_->SetParticipants({
+		p1.SetBot(a1, 1);
+		p2.SetBot(a2, 2);
+		_coordinator->SetParticipants({
 			CreateParticipant(config.player1.race, a1),
 			CreateParticipant(config.player2.race, a2),
 		});
 	}
 	
-	coordinator_->SetPortStart(config.port);
+	_coordinator->SetPortStart(config.port);
 
 #ifdef SCREENCAPTURE
 #if defined(__linux__)
 #if LINUX_USE_SOFTWARE_RENDER
-	coordinator_->AddCommandLine("-osmesapath /usr/lib/x86_64-linux-gnu/libOSMesa.so");
+	_coordinator->AddCommandLine("-osmesapath /usr/lib/x86_64-linux-gnu/libOSMesa.so");
 #else
-	coordinator_->AddCommandLine("-eglpath libEGL.so");
+	_coordinator->AddCommandLine("-eglpath libEGL.so");
 #endif // LINUX_USE_SOFTWARE_RENDER
 #endif // defined(__linux__)
 #endif // SCREENCAPTURE
 }
 
 void Simulator::reset() {
-	delete coordinator_;
+	delete _coordinator;
 	if (config.simmode == SimulatorConfig::SimMode::CvC) {
 		delete a1;
 	}
@@ -389,7 +394,6 @@ void Simulator::reset() {
 	set();
 }
 
-sc2::Coordinator* Simulator::coordinator() {
-	return coordinator_;
+sc2::Coordinator* Simulator::Coordinator() {
+	return _coordinator;
 }
-

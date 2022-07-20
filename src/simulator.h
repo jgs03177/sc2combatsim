@@ -27,12 +27,12 @@ private:
 
 	const int32_t stepsize;
 
-	sc2::Coordinator* coordinator_;
+	sc2::Coordinator* _coordinator;
 
 public:
 	~Simulator();
 	Simulator(int argc, char* argv[], const SimulatorConfig& config);
-	sc2::Coordinator* coordinator();
+	sc2::Coordinator* Coordinator();
 	void set();
 	void reset();
 	int Begin();

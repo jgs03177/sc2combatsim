@@ -30,8 +30,8 @@ configure_file(
 #    set(CMAKE_CXX_FLAGS "-fpermissive")  
 #endif()
 
-# Build with c++14 support.
-set(CMAKE_CXX_STANDARD 14)
+# Build with c++17 support.
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories("${PROJECT_BINARY_DIR}/generated")
 
