@@ -15,15 +15,15 @@ https://user-images.githubusercontent.com/30069011/128225373-eb084511-7d9b-42bb-
 
 #### Windows
 
-Starting from the main directory, clone s2client-api fork, and build the code with cmake. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
+Starting from the main directory, clone s2client-api fork, and build the code with cmake. A document for installation can be found [here](https://github.com/jgs03177/cpp-sc2/blob/master/docs/building.md).
 
 ```cmd
 git clone --recursive https://github.com/jgs03177/cpp-sc2.git && cd cpp-sc2
-mkdir build && cd build
-cmake ..
+cmake -B build
+cmake --build build --parallel
 ```
 
-Build with Visual Studio both debug mode and release mode to get the compiled libraries. We are going to move the headers and libraries later.
+Build with Visual Studio in both debug mode and release mode to get the compiled libraries. We are going to move the headers and libraries later.
 Go back to the main directory and clone this project (StarCraft 2 Combat Simulator), and move the headers and libraries by executing `sc2combatsim/move.bat`. This will copy
 `cpp-sc2/include/*/*.h`(headers) and `cpp-sc2/build/bin/*.lib`(libraries) into `sc2combatsim/include` and `sc2combatsim/lib`, respectively. Then, build the simulator code with cmake.
 
@@ -31,21 +31,20 @@ Go back to the main directory and clone this project (StarCraft 2 Combat Simulat
 cd ../..
 git clone https://github.com/jgs03177/sc2combatsim.git && cd sc2combatsim
 move.bat
-mkdir build && cd build
-cmake ..
+cmake -B build
+cmake --build build --parallel
 ```
 
 Finally, build with Visual Studio and run the generated `sc2combatsim.exe`.
 
 #### Linux
 
-Starting from the main directory, clone s2client-api fork and build the code. A document for installation can be found [here](https://github.com/Blizzard/s2client-api/blob/master/docs/building.md).
+Starting from the main directory, clone s2client-api fork and build the code. A document for installation can be found [here](https://github.com/jgs03177/cpp-sc2/blob/master/docs/building.md).
 
 ```bash
 git clone --recursive https://github.com/jgs03177/cpp-sc2.git && cd cpp-sc2
-mkdir build && cd build
-cmake ..
-make
+cmake -B build
+cmake --build build --parallel
 ```
 
 Go back to the main directory and clone this project (StarCraft 2 Combat Simulator), and move the headers and libraries by executing `sc2combatsim/move.sh`. Then, build the simulator code.
@@ -54,9 +53,8 @@ Go back to the main directory and clone this project (StarCraft 2 Combat Simulat
 cd ../..
 git clone https://github.com/jgs03177/sc2combatsim.git && cd sc2combatsim
 sh move.sh
-mkdir build && cd build
-cmake ..
-make
+cmake -B build
+cmake --build build --parallel
 ```
 
 Finally, run the generated executable `SC2CombatSim`.
@@ -112,7 +110,7 @@ You can modify simulation settings by modifying `config/config.json`.
 
 ### Application
 
-+ Predict combat outcomes of two armies and optimize a unit-combination of an army. [(Link)](https://github.com/jgs03177/pcooa-sc2)
++ Predict combat outcomes of two armies and optimize a unit-combination of an army. [(Link)](https://github.com/jgs03177/sc2squad)
 
 ### Papers
 
