@@ -254,6 +254,7 @@ int Simulator::Update() {
 			p1.KillPlayerUnit();
 			p2.KillPlayerUnit();
 			simflag = inremove;
+			cdelay = ndelay;
 			break;
 		}
 		// wait until all units are cleared
@@ -262,6 +263,14 @@ int Simulator::Update() {
 			size_t sim2size = p2.CountPlayerUnit();
 			if (sim1size == 0 && sim2size == 0) {
 				simflag = onchange;
+			}
+			// to prevent an infinite loop, remove units again
+			// (e.g. merging archon is not cleared)
+			else if (cdelay) {
+				cdelay--;
+			}
+			else {
+				simflag = onremove;
 			}
 			break;
 		}
