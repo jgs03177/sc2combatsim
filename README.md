@@ -114,7 +114,7 @@ You can modify simulation settings by modifying `config/config.json`.
 
 ### Papers
 
-+ [Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning](https://authors.elsevier.com/c/1dUHX3PiGTH-G1)
++ [Predicting Combat Outcomes and Optimizing Armies in StarCraft II by Deep Learning](https://doi.org/10.1016/j.eswa.2021.115592)
 
 ```bibtex
 @article{Lee2021,
